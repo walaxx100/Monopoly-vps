@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  monopoly:
+    build: .
+    container_name: monopoly-worldwide
+    restart: unless-stopped
+    ports:
+      - "3456:3456"
+    environment:
+      - PORT=3456
+    # Optional: run behind your existing nginx/traefik
+    # networks:
+    #   - your-existing-network
+
+# If you want to add to an existing network (e.g. your wordpress network):
+# networks:
+#   your-existing-network:
+#     external: true
