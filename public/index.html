@@ -8,17 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* Paleta de colores estilo Richup (Claro y Moderno) */
-    --bg: #f8fafc;
+    --bg: #f1f5f9;
     --surface: #ffffff;
-    --surface2: #f1f5f9;
     --border: #cbd5e1;
     --text: #1e293b;
-    --muted: #64748b;
-    --accent: #4f46e5; /* Índigo vibrante */
-    --gold: #f59e0b;
-    --danger: #ef4444;
+    --accent: #4f46e5;
     --success: #10b981;
+    --danger: #ef4444;
     
     /* Colores de Propiedades */
     --brown: #78350f; --teal: #06b6d4; --yellow: #eab308;
@@ -29,449 +25,315 @@
 
   * { box-sizing: border-box; }
   body {
-    margin: 0; padding: 0;
-    font-family: 'Nunito', sans-serif;
-    background-color: var(--bg);
-    color: var(--text);
-    overflow-x: hidden;
+    margin: 0; font-family: 'Nunito', sans-serif;
+    background: var(--bg); color: var(--text);
+    display: flex; height: 100vh; overflow: hidden;
   }
 
-  /* --- LAYOUT PRINCIPAL --- */
-  .game-container {
-    display: flex;
-    flex-direction: row;
-    height: 100vh;
-    padding: 20px;
-    gap: 20px;
+  /* --- LOGIN & LOBBY (Tu lógica original) --- */
+  #setup-container {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9);
+    z-index: 2000; display: flex; align-items: center; justify-content: center;
   }
+  .setup-box { background: white; padding: 30px; border-radius: 16px; width: 400px; text-align: center; }
+  input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; }
+  button.primary { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
 
-  /* --- TABLERO (Grid 11x11) --- */
-  .board-wrapper {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  /* --- LAYOUT DEL JUEGO --- */
+  .main-layout { display: none; width: 100%; height: 100%; flex-direction: row; padding: 20px; gap: 20px; }
 
+  /* Sidebar Izquierda: Jugadores y Log */
+  .sidebar { width: 300px; display: flex; flex-direction: column; gap: 20px; }
+  .panel { background: white; border-radius: 12px; padding: 15px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+  .player-card { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; margin-bottom: 5px; border: 2px solid transparent; }
+  .player-card.active { border-color: var(--accent); background: #f5f3ff; }
+  #log { height: 200px; overflow-y: auto; font-size: 0.85rem; display: flex; flex-direction: column-reverse; }
+
+  /* --- TABLERO (Grid 11x11 CORREGIDO) --- */
+  .board-container { flex: 1; display: flex; align-items: center; justify-content: center; }
   .board {
     display: grid;
     grid-template-columns: repeat(11, 1fr);
     grid-template-rows: repeat(11, 1fr);
-    width: min(90vh, 800px);
-    height: min(90vh, 800px);
-    background-color: var(--border);
-    border: 4px solid #475569;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    width: min(90vh, 750px);
+    height: min(90vh, 750px);
+    background: #94a3b8;
+    border: 5px solid #475569;
     position: relative;
-    gap: 2px; /* Espacio para las líneas del tablero */
+    gap: 1px;
   }
 
-  /* Centro del Tablero */
   .board-center {
-    grid-column: 2 / 11;
-    grid-row: 2 / 11;
-    background-color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    background-image: radial-gradient(#f1f5f9 1px, transparent 1px);
+    grid-column: 2 / 11; grid-row: 2 / 11;
+    background: white; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; position: relative;
+    background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
     background-size: 20px 20px;
   }
 
-  #center-ui {
-    text-align: center;
-    z-index: 10;
+  /* Botón de Dados Central */
+  #roll-btn {
+    padding: 20px 40px; font-size: 1.5rem; font-weight: 800;
+    background: var(--accent); color: white; border: none;
+    border-radius: 12px; cursor: pointer;
+    box-shadow: 0 6px 0 #3730a3; transition: all 0.1s;
   }
+  #roll-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #3730a3; }
+  #roll-btn:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; transform: none; }
 
-  #roll-dice-btn {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 18px 40px;
-    font-size: 1.8rem;
-    font-weight: 800;
-    border-radius: 16px;
-    cursor: pointer;
-    box-shadow: 0 8px 0 #3730a3;
-    transition: all 0.1s;
-    margin-bottom: 15px;
-  }
-
-  #roll-dice-btn:hover { background: #4338ca; transform: translateY(-2px); }
-  #roll-dice-btn:active { transform: translateY(6px); box-shadow: 0 2px 0 #3730a3; }
-  #roll-dice-btn:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; transform: none; }
-
-  /* --- CASILLAS --- */
+  /* Casillas */
   .space {
-    background: var(--surface);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding: 5px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-align: center;
-    overflow: hidden;
-    cursor: pointer;
+    background: white; position: relative; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; font-size: 0.65rem;
+    font-weight: 700; text-align: center; border: 1px solid #e2e8f0;
   }
 
-  .space:hover { background: var(--surface2); }
+  .color-bar { position: absolute; background: #ccc; }
+  
+  /* Posicionamiento de barras de color */
+  .bottom-row .color-bar { top: 0; left: 0; width: 100%; height: 20%; }
+  .top-row .color-bar { bottom: 0; left: 0; width: 100%; height: 20%; }
+  .left-col .color-bar { top: 0; right: 0; width: 20%; height: 100%; }
+  .right-col .color-bar { top: 0; left: 0; width: 20%; height: 100%; }
 
-  .space .color-bar {
-    width: 100%;
-    height: 20%;
-    position: absolute;
-    top: 0; left: 0;
-    border-bottom: 2px solid rgba(0,0,0,0.1);
-  }
+  /* Colores */
+  .red .color-bar { background: var(--red); }
+  .blue .color-bar { background: var(--blue); }
+  .green .color-bar { background: var(--green); }
+  .yellow .color-bar { background: var(--yellow); }
+  .orange .color-bar { background: var(--orange); }
+  .pink .color-bar { background: var(--pink); }
+  .teal .color-bar { background: var(--teal); }
+  .brown .color-bar { background: var(--brown); }
 
-  /* Ajuste de barras de color según posición */
-  .bottom-row .color-bar { top: 0; }
-  .top-row .color-bar { bottom: 0; top: auto; }
-  .left-col .color-bar { right: 0; left: auto; width: 20%; height: 100%; border-bottom: none; border-left: 2px solid rgba(0,0,0,0.1); }
-  .right-col .color-bar { left: 0; right: auto; width: 20%; height: 100%; border-bottom: none; border-right: 2px solid rgba(0,0,0,0.1); }
-
-  .space.red .color-bar { background: var(--red); }
-  .space.blue .color-bar { background: var(--blue); }
-  .space.green .color-bar { background: var(--green); }
-  .space.yellow .color-bar { background: var(--yellow); }
-  .space.orange .color-bar { background: var(--orange); }
-  .space.pink .color-bar { background: var(--pink); }
-  .space.teal .color-bar { background: var(--teal); }
-  .space.brown .color-bar { background: var(--brown); }
-
-  /* Esquinas */
-  .space.go, .space.jail, .space.parking, .space.to_jail {
-    background: #f8fafc;
-    font-size: 0.9rem;
-  }
-
-  /* --- JUGADORES (ANIMACIONES) --- */
+  /* --- TOKENS Y ANIMACIONES --- */
   .player-token {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 3px solid white;
-    position: absolute;
-    z-index: 100;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    transition: all 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28); /* Salto suave */
+    width: 22px; height: 22px; border-radius: 50%; border: 2px solid white;
+    position: absolute; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    transition: all 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
   }
 
-  /* Mensajes flotantes ("Toasts") */
-  .toast {
-    position: absolute;
-    top: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1e293b;
-    color: white;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    white-space: nowrap;
-    pointer-events: none;
-    animation: floatUp 2s ease-out forwards;
+  .toast-msg {
+    position: absolute; top: -35px; left: 50%; transform: translateX(-50%);
+    background: #1e293b; color: white; padding: 3px 10px; border-radius: 12px;
+    font-size: 0.7rem; animation: floatUp 1.5s forwards;
   }
 
   @keyframes floatUp {
     0% { opacity: 0; transform: translate(-50%, 0); }
-    20% { opacity: 1; transform: translate(-50%, -15px); }
-    80% { opacity: 1; }
-    100% { opacity: 0; transform: translate(-50%, -40px); }
+    20% { opacity: 1; transform: translate(-50%, -10px); }
+    100% { opacity: 0; transform: translate(-50%, -30px); }
   }
-
-  /* --- SIDEBARS --- */
-  .sidebar {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    max-width: 350px;
-  }
-
-  .panel {
-    background: var(--surface);
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    padding: 15px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-  }
-
-  .player-card {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 5px;
-    transition: background 0.3s;
-  }
-  .player-card.active { border: 2px solid var(--accent); background: #f5f3ff; }
-
-  .cash { font-weight: 800; color: var(--success); }
-
-  /* --- LOG --- */
-  #log-container {
-    height: 200px;
-    overflow-y: auto;
-    font-size: 0.85rem;
-    display: flex;
-    flex-direction: column-reverse;
-  }
-  .log-entry { padding: 4px 0; border-bottom: 1px solid var(--surface2); }
-
-  /* Detalle de Casilla (Tooltip) */
-  #space-detail {
-    position: fixed;
-    width: 200px;
-    background: white;
-    border: 2px solid #334155;
-    border-radius: 8px;
-    z-index: 1000;
-    display: none;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  }
-  #space-detail.open { display: block; }
-  .sd-header { height: 40px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; border-radius: 6px 6px 0 0; }
-  .sd-body { padding: 10px; }
 </style>
 </head>
 <body>
 
-<div class="game-container">
+<div id="setup-container">
+  <div class="setup-box" id="login-step">
+    <h2>Mr. Worldwide</h2>
+    <input type="text" id="username-input" placeholder="Tu nombre">
+    <button class="primary" onclick="showLobby()">Entrar</button>
+  </div>
+  <div class="setup-box" id="lobby-step" style="display:none;">
+    <h3>Salas Disponibles</h3>
+    <div id="room-list"></div>
+    <hr>
+    <input type="text" id="new-room-id" placeholder="ID de nueva sala">
+    <button class="primary" onclick="joinRoom(document.getElementById('new-room-id').value)">Crear Sala</button>
+  </div>
+</div>
+
+<div class="main-layout" id="game-ui">
   <div class="sidebar">
     <div class="panel">
-      <h2 style="margin:0 0 10px 0; font-size: 1.2rem;">Jugadores</h2>
+      <h3 style="margin-top:0">Jugadores</h3>
       <div id="players-list"></div>
     </div>
-    <div class="panel" style="flex:1;">
-      <h2 style="margin:0 0 10px 0; font-size: 1.2rem;">Actividad</h2>
-      <div id="log-container"></div>
+    <div class="panel" style="flex:1">
+      <h3 style="margin-top:0">Actividad</h3>
+      <div id="log"></div>
     </div>
   </div>
 
-  <div class="board-wrapper">
-    <div class="board" id="board">
+  <div class="board-container">
+    <div class="board" id="board-grid">
       </div>
   </div>
 
   <div class="sidebar">
-    <div id="action-panel" class="panel" style="display:none;">
-      <h3 id="action-title" style="margin:0 0 10px 0;">Acción Requerida</h3>
-      <div id="action-desc" style="margin-bottom:15px; font-size: 0.9rem;"></div>
-      <div id="action-buttons" style="display:grid; gap:10px;"></div>
-    </div>
-    
-    <div class="panel">
-      <h3 style="margin:0; font-size: 1rem;">Tus Propiedades</h3>
-      <div id="my-properties" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:5px; margin-top:10px;"></div>
+    <div id="action-panel" class="panel" style="display:none">
+      <h3 id="action-title">Acción</h3>
+      <div id="action-desc"></div>
+      <div id="action-btns" style="margin-top:10px; display:grid; gap:5px"></div>
     </div>
   </div>
 </div>
 
-<div id="space-detail">
-  <div id="sd-header" class="sd-header"></div>
-  <div id="sd-body" class="sd-body"></div>
-</div>
-
-<script src="/socket.io/socket.io.js"></script>
 <script>
-  let socket = io();
-  let gameState = null;
-  let myPlayerId = null;
-  const boardData = []; // Esto debería venir de tu boardData.js compartido o cargado
+  let ws;
+  let myId;
+  let gameState;
+  let playerName = "";
 
-  // --- LÓGICA DE RENDERIZADO DEL TABLERO ---
-  function renderBoard() {
-    const boardEl = document.getElementById('board');
-    boardEl.innerHTML = '';
+  function showLobby() {
+    playerName = document.getElementById('username-input').value;
+    if (!playerName) return alert("Pon un nombre");
+    document.getElementById('login-step').style.display = 'none';
+    document.getElementById('lobby-step').style.display = 'block';
+    connect();
+  }
 
-    // 1. Crear Centro
+  function connect() {
+    // IMPORTANTE: WebSockets nativos como en tu server.js
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${protocol}//${window.location.host}`);
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      switch(data.type) {
+        case 'room_list': renderRoomList(data.list); break;
+        case 'init': myId = data.playerId; break;
+        case 'state_update': handleStateUpdate(data.state); break;
+      }
+    };
+  }
+
+  function joinRoom(roomId) {
+    ws.send(JSON.stringify({ type: 'join_room', roomId, playerName }));
+    document.getElementById('setup-container').style.display = 'none';
+    document.getElementById('game-ui').style.display = 'flex';
+  }
+
+  function handleStateUpdate(state) {
+    // Animación de dinero antes de actualizar estado
+    if (gameState) {
+      state.players.forEach(p => {
+        const old = gameState.players.find(o => o.id === p.id);
+        if (old && p.cash > old.cash) toast(p.id, `+$${p.cash - old.cash} 💰`);
+        if (old && p.cash < old.cash) toast(p.id, `-$${old.cash - p.cash} 💸`);
+      });
+    }
+    gameState = state;
+    renderBoardOnce();
+    updateUI();
+  }
+
+  function renderBoardOnce() {
+    const grid = document.getElementById('board-grid');
+    if (grid.children.length > 0) return; // Solo renderizar una vez
+
+    // 1. Centro
     const center = document.createElement('div');
     center.className = 'board-center';
     center.innerHTML = `
-      <div id="center-ui">
-        <div id="dice-visual" style="font-size: 4rem; margin-bottom: 10px;">🎲🎲</div>
-        <button id="roll-dice-btn" onclick="sendAction('roll_dice')">TIRAR DADOS</button>
-        <div id="turn-msg" style="font-weight: 700; color: var(--muted);">Esperando...</div>
-      </div>
+      <div id="dice-area" style="font-size: 3rem; margin-bottom: 10px;">🎲🎲</div>
+      <button id="roll-btn" onclick="sendAction('roll_dice')">TIRAR DADOS</button>
+      <div id="turn-indicator" style="margin-top:10px; font-weight:800"></div>
     `;
-    boardEl.appendChild(center);
+    grid.appendChild(center);
 
-    // 2. Generar 40 Casillas
-    // Usamos el layout de Monopoly: 0-10 abajo, 11-20 izq, 21-30 arriba, 31-39 der.
-    for(let i=0; i<40; i++) {
-      const space = gameState.board[i];
+    // 2. Casillas con Grid exacto
+    gameState.board.forEach((space, i) => {
       const el = document.createElement('div');
-      el.className = `space ${space.type || ''} ${space.color || ''}`;
+      el.className = `space ${space.type} ${space.color || ''}`;
       el.id = `space-${i}`;
-      
-      // Determinar posición en el Grid 11x11
-      let row, col, sideClass;
-      if (i >= 0 && i <= 10) { row = 11; col = 11 - i; sideClass = 'bottom-row'; }
-      else if (i > 10 && i <= 20) { col = 1; row = 11 - (i - 10); sideClass = 'left-col'; }
-      else if (i > 20 && i <= 30) { row = 1; col = i - 19; sideClass = 'top-row'; }
-      else { col = 11; row = i - 29; sideClass = 'right-col'; }
+
+      let row, col, side;
+      if (i <= 10) { row = 11; col = 11 - i; side = 'bottom-row'; }
+      else if (i <= 20) { col = 1; row = 11 - (i - 10); side = 'left-col'; }
+      else if (i <= 30) { row = 1; col = i - 19; side = 'top-row'; }
+      else { col = 11; row = i - 29; side = 'right-col'; }
 
       el.style.gridRow = row;
       el.style.gridColumn = col;
-      el.classList.add(sideClass);
-
-      // Contenido de la casilla
-      let content = '';
-      if(space.color) content += `<div class="color-bar"></div>`;
-      content += `<div style="margin-top: ${space.color?'25%':'5px'}">${space.flag || ''} ${space.name}</div>`;
-      if(space.price) content += `<div style="color:var(--success)">$${space.price}</div>`;
+      el.classList.add(side);
       
-      el.innerHTML = content;
-      el.onclick = (e) => showSpaceDetail(e, i);
-      boardEl.appendChild(el);
-    }
-    
-    // 3. Crear Tokens de Jugadores
+      el.innerHTML = `
+        ${space.color ? '<div class="color-bar"></div>' : ''}
+        <div style="padding: 2px">${space.flag || ''} ${space.name}</div>
+        ${space.price ? `<div style="color:var(--success)">$${space.price}</div>` : ''}
+      `;
+      grid.appendChild(el);
+    });
+
+    // 3. Tokens
     gameState.players.forEach(p => {
       const token = document.createElement('div');
       token.className = 'player-token';
       token.id = `token-${p.id}`;
-      token.style.backgroundColor = p.color || '#000';
-      boardEl.appendChild(token);
+      token.style.background = p.color;
+      grid.appendChild(token);
     });
   }
 
-  // --- ANIMACIONES Y ACTUALIZACIÓN ---
   function updateUI() {
-    if(!gameState) return;
-
-    // Actualizar Turno y Botón
-    const isMyTurn = gameState.players[gameState.currentPlayerIndex].id === myPlayerId;
-    const btn = document.getElementById('roll-dice-btn');
-    const turnMsg = document.getElementById('turn-msg');
+    const curPlayer = gameState.players[gameState.currentPlayerIndex];
+    const isMyTurn = curPlayer.id === myId;
     
-    if (isMyTurn && gameState.phase === 'playing' && !gameState.pendingAction) {
-      btn.disabled = false;
-      turnMsg.innerText = "¡ES TU TURNO!";
-      turnMsg.style.color = "var(--accent)";
-    } else {
-      btn.disabled = true;
-      const currentP = gameState.players[gameState.currentPlayerIndex];
-      turnMsg.innerText = `Turno de ${currentP.name}`;
-      turnMsg.style.color = "var(--muted)";
-    }
-
-    // Actualizar Dados
-    if(gameState.dice) {
-      document.getElementById('dice-visual').innerText = getDiceEmoji(gameState.dice[0]) + getDiceEmoji(gameState.dice[1]);
-    }
-
-    // Mover Jugadores con Animación
+    document.getElementById('roll-btn').disabled = !isMyTurn || gameState.phase !== 'playing' || gameState.pendingAction;
+    document.getElementById('turn-indicator').innerText = isMyTurn ? "TU TURNO" : `Turno de ${curPlayer.name}`;
+    
+    // Mover tokens
     gameState.players.forEach(p => {
-      movePlayerToken(p.id, p.position);
+      const token = document.getElementById(`token-${p.id}`);
+      const space = document.getElementById(`space-${p.position}`);
+      if (token && space) {
+        const rect = space.getBoundingClientRect();
+        const boardRect = document.getElementById('board-grid').getBoundingClientRect();
+        const offset = (parseInt(p.id.slice(0,2), 16) % 15); // Offset para que no se tapen
+        token.style.top = (rect.top - boardRect.top + 10 + offset) + 'px';
+        token.style.left = (rect.left - boardRect.left + 10 + offset) + 'px';
+      }
     });
 
-    // Lista de Jugadores
-    const list = document.getElementById('players-list');
-    list.innerHTML = gameState.players.map((p, i) => `
+    // Lista de jugadores
+    document.getElementById('players-list').innerHTML = gameState.players.map((p, i) => `
       <div class="player-card ${i === gameState.currentPlayerIndex ? 'active' : ''}">
-        <div style="width:15px; height:15px; border-radius:50%; background:${p.color}"></div>
+        <div style="width:12px; height:12px; border-radius:50%; background:${p.color}"></div>
         <div style="flex:1"><b>${p.name}</b></div>
-        <div class="cash">$${p.cash}</div>
+        <div style="color:var(--success); font-weight:800">$${p.cash}</div>
       </div>
     `).join('');
 
-    // Log de actividad
-    const logCont = document.getElementById('log-container');
-    logCont.innerHTML = gameState.log.slice(-20).map(l => `
-      <div class="log-entry">${l.msg}</div>
-    `).join('');
-  }
-
-  function movePlayerToken(playerId, position) {
-    const token = document.getElementById(`token-${playerId}`);
-    const space = document.getElementById(`space-${position}`);
-    if(!token || !space) return;
-
-    const rect = space.getBoundingClientRect();
-    const boardRect = document.getElementById('board').getBoundingClientRect();
-
-    // Calculamos posición relativa al tablero
-    // Añadimos un pequeño offset aleatorio para que los tokens no se tapen totalmente
-    const offset = (parseInt(playerId) % 4) * 5; 
-    const top = (rect.top - boardRect.top) + 15 + offset;
-    const left = (rect.left - boardRect.left) + 15 + offset;
-
-    token.style.top = `${top}px`;
-    token.style.left = `${left}px`;
-  }
-
-  // Función para mostrar mensajes "Haz recibido $50", etc.
-  function showToast(playerId, message) {
-    const token = document.getElementById(`token-${playerId}`);
-    if(!token) return;
-
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerText = message;
-    token.appendChild(toast);
-
-    setTimeout(() => toast.remove(), 2000);
-  }
-
-  function getDiceEmoji(num) {
-    return ['','⚀','⚁','⚂','⚃','⚄','⚅'][num] || '🎲';
-  }
-
-  // --- EVENTOS DEL SOCKET ---
-  socket.on('init', (data) => {
-    myPlayerId = data.playerId;
-  });
-
-  socket.on('state_update', (newState) => {
-    // Detectar cambios para mostrar Toasts
-    if(gameState) {
-      newState.players.forEach((p, i) => {
-        const oldP = gameState.players.find(x => x.id === p.id);
-        if(oldP && p.cash > oldP.cash) showToast(p.id, `+$${p.cash - oldP.cash} 💰`);
-        if(oldP && p.cash < oldP.cash) showToast(p.id, `-$${oldP.cash - p.cash} 💸`);
-      });
+    // Panel de Acciones (Comprar, Pagar)
+    const actionPanel = document.getElementById('action-panel');
+    if (gameState.pendingAction && gameState.pendingAction.playerId === myId) {
+      actionPanel.style.display = 'block';
+      document.getElementById('action-title').innerText = "Decisión";
+      document.getElementById('action-desc').innerText = "Debes tomar una acción sobre esta casilla.";
+      // Botones dinámicos según tu lógica de server
+      renderActionButtons();
+    } else {
+      actionPanel.style.display = 'none';
     }
 
-    gameState = newState;
-    if(!document.getElementById('space-0')) renderBoard(); // Render inicial
-    updateUI();
-  });
+    // Log
+    document.getElementById('log').innerHTML = gameState.log.slice(-15).map(l => `<div>${l.msg}</div>`).join('');
+  }
+
+  function toast(pid, msg) {
+    const token = document.getElementById(`token-${pid}`);
+    if (!token) return;
+    const t = document.createElement('div');
+    t.className = 'toast-msg';
+    t.innerText = msg;
+    token.appendChild(t);
+    setTimeout(() => t.remove(), 1500);
+  }
 
   function sendAction(type, payload = {}) {
-    socket.emit('game_action', { type, ...payload });
+    ws.send(JSON.stringify({ type: 'game_action', payload: { type, ...payload } }));
   }
 
-  // Tooltip simple
-  function showSpaceDetail(e, i) {
-    const space = gameState.board[i];
-    const detail = document.getElementById('space-detail');
-    const header = document.getElementById('sd-header');
-    const body = document.getElementById('sd-body');
-
-    header.style.backgroundColor = space.color ? `var(--${space.color})` : '#334155';
-    header.innerText = space.name;
-    body.innerHTML = `
-      <p>Tipo: ${space.type}</p>
-      ${space.price ? `<p>Precio: <b>$${space.price}</b></p>` : ''}
-      ${space.rent ? `<p>Alquiler base: $${space.rent[0]}</p>` : ''}
-    `;
-
-    detail.style.left = `${e.pageX + 10}px`;
-    detail.style.top = `${e.pageY + 10}px`;
-    detail.classList.add('open');
-    e.stopPropagation();
+  function renderRoomList(list) {
+    const cont = document.getElementById('room-list');
+    cont.innerHTML = list.map(r => `
+      <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between">
+        <span><b>${r.id}</b> (${r.playerCount} jugadores)</span>
+        <button onclick="joinRoom('${r.id}')">Unirse</button>
+      </div>
+    `).join('') || "No hay salas activas.";
   }
-
-  document.onclick = () => document.getElementById('space-detail').classList.remove('open');
-
 </script>
 </body>
 </html>
