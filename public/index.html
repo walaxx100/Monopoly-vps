@@ -1,1393 +1,477 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mr. Worldwide — Monopoly</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0e1a;
-    --surface: #1a1828;
-    --surface2: #231f35;
-    --border: #2e2a45;
-    --accent: #7c5cbf;
-    --accent2: #5b8dee;
-    --gold: #f4c430;
-    --text: #e8e4f8;
-    --muted: #8b85a8;
-    --danger: #e05252;
-    --success: #4caf6e;
-    --brown: #8B4513; --teal: #008B8B; --yellow: #DAA520;
-    --purple: #7B2D8B; --orange: #FF8C00; --red: #DC143C;
-    --pink: #C71585; --blue: #0066CC; --green: #006400;
-    --lightblue: #4169E1; --darkgreen: #228B22;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Nunito', sans-serif; min-height: 100vh; overflow-x: hidden; }
-  h1, h2, .title-font { font-family: 'Boogaloo', cursive; }
-
-  /* SCREENS */
-  .screen { display: none; min-height: 100vh; }
-  .screen.active { display: flex; flex-direction: column; }
-
-  /* LOBBY */
-  #lobby-screen { align-items: center; justify-content: center; background: radial-gradient(ellipse at 50% 30%, #1e1540 0%, var(--bg) 70%); }
-  .lobby-hero { text-align: center; margin-bottom: 2rem; }
-  .lobby-hero h1 { font-size: 4rem; color: var(--gold); text-shadow: 0 0 30px rgba(244,196,48,0.4); letter-spacing: 2px; }
-  .lobby-hero p { color: var(--muted); font-size: 1.1rem; margin-top: 0.5rem; }
-  .lobby-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 480px; }
-  .lobby-card h2 { color: var(--accent); margin-bottom: 1.5rem; font-size: 1.4rem; }
-  .form-group { margin-bottom: 1rem; }
-  .form-group label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-  input[type=text], input[type=number], select { width: 100%; padding: 0.7rem 1rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; font-size: 1rem; outline: none; transition: border-color 0.2s; }
-  input:focus, select:focus { border-color: var(--accent); }
-  .color-picker { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-  .color-swatch { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.1s, border-color 0.1s; }
-  .color-swatch.selected { border-color: white; transform: scale(1.15); }
-  .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 10px; font-family: 'Boogaloo', cursive; font-size: 1.2rem; cursor: pointer; transition: transform 0.1s, opacity 0.2s; letter-spacing: 1px; }
-  .btn:active { transform: scale(0.97); }
-  .btn-primary { background: var(--accent); color: white; width: 100%; margin-top: 1rem; }
-  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); width: 100%; margin-top: 0.5rem; }
-  .btn-gold { background: var(--gold); color: #1a1000; }
-  .btn-danger { background: var(--danger); color: white; }
-  .btn-success { background: var(--success); color: white; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
-  .tab { flex: 1; padding: 0.6rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; text-align: center; cursor: pointer; font-family: 'Boogaloo', cursive; font-size: 1.1rem; transition: background 0.2s; }
-  .tab.active { background: var(--accent); border-color: var(--accent); }
-  .room-list { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; }
-  .room-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color 0.2s; }
-  .room-item:hover { border-color: var(--accent); }
-  .room-item .room-id { font-family: 'Boogaloo', cursive; font-size: 1.2rem; color: var(--gold); }
-  .room-item .room-info { font-size: 0.85rem; color: var(--muted); }
-  .room-code-input { display: flex; gap: 0.5rem; }
-  .room-code-input input { flex: 1; text-transform: uppercase; }
-
-  /* WAITING ROOM */
-  #waiting-screen { align-items: center; justify-content: center; background: var(--bg); }
-  .waiting-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 500px; text-align: center; }
-  .room-id-display { font-family: 'Boogaloo', cursive; font-size: 3rem; color: var(--gold); letter-spacing: 8px; margin: 1rem 0; }
-  .player-slots { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin: 1.5rem 0; }
-  .player-slot { padding: 0.5rem 1rem; border-radius: 20px; font-weight: 700; font-size: 0.9rem; }
-
-  /* GAME SCREEN */
-  #game-screen { flex-direction: row; height: 100vh; overflow: hidden; }
-
-  /* BOARD */
-  .board-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow: hidden; }
-  .board { position: relative; display: grid; grid-template-columns: 80px repeat(9, 60px) 80px; grid-template-rows: 80px repeat(9, 60px) 80px; background: #0a3d0a; border: 4px solid var(--gold); border-radius: 4px; }
-
-  /* Board spaces */
-  .space { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; text-align: center; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: background 0.15s; overflow: hidden; padding: 2px; }
-  .space:hover { background: rgba(255,255,255,0.08) !important; }
-  .space .space-name { font-size: 0.5rem; line-height: 1.1; max-width: 100%; overflow: hidden; text-overflow: ellipsis; color: #fff; text-shadow: 0 1px 2px #000; }
-  .space .space-price { font-size: 0.45rem; color: var(--gold); margin-top: 1px; }
-  .space .space-flag { font-size: 0.8rem; }
-  .space .color-bar { height: 8px; width: 100%; position: absolute; top: 0; left: 0; }
-  .space.bottom .color-bar { top: auto; bottom: 0; }
-  .space.left .color-bar { width: 8px; height: 100%; top: 0; right: 0; left: auto; }
-  .space.right .color-bar { width: 8px; height: 100%; top: 0; left: 0; }
-
-  /* Corner spaces */
-  .space.corner { font-size: 0.6rem; background: #0d4d0d; }
-  .space.corner .corner-text { font-family: 'Boogaloo', cursive; font-size: 0.7rem; color: var(--gold); text-shadow: 0 1px 2px #000; }
-
-  /* Center */
-  .board-center { grid-column: 2 / 11; grid-row: 2 / 11; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0a3d0a; }
-  .board-title { font-family: 'Boogaloo', cursive; font-size: 2.5rem; color: var(--gold); text-align: center; text-shadow: 0 0 20px rgba(244,196,48,0.4); }
-  .board-globe { font-size: 4rem; }
-
-  /* Token markers */
-  .tokens-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-  .token { position: absolute; width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.6); transform: translate(-50%, -50%); font-size: 9px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; text-shadow: 0 1px 1px #000; transition: all 0.5s ease; z-index: 10; }
-  .house-icons { position: absolute; bottom: 2px; right: 2px; display: flex; gap: 1px; }
-  .house-icon { width: 6px; height: 6px; background: #00cc44; border-radius: 1px; }
-  .hotel-icon { width: 8px; height: 8px; background: #cc2200; border-radius: 1px; }
-
-  /* SIDEBAR */
-  .sidebar { width: 320px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-  .sidebar-tabs { display: flex; border-bottom: 1px solid var(--border); }
-  .sidebar-tab { flex: 1; padding: 0.75rem 0.5rem; text-align: center; font-family: 'Boogaloo', cursive; font-size: 1rem; cursor: pointer; color: var(--muted); transition: color 0.2s, border-bottom 0.2s; border-bottom: 3px solid transparent; }
-  .sidebar-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
-  .sidebar-content { flex: 1; overflow-y: auto; padding: 1rem; }
-  .sidebar-content::-webkit-scrollbar { width: 4px; }
-  .sidebar-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  /* PLAYERS PANEL */
-  .player-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem; margin-bottom: 0.5rem; transition: border-color 0.2s; }
-  .player-card.active-turn { border-color: var(--gold); box-shadow: 0 0 12px rgba(244,196,48,0.2); }
-  .player-card.bankrupt { opacity: 0.4; }
-  .player-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
-  .player-token { width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; color: white; }
-  .player-name { font-weight: 800; font-size: 0.9rem; }
-  .player-cash { font-family: 'Boogaloo', cursive; font-size: 1.2rem; color: var(--gold); }
-  .player-status { font-size: 0.75rem; color: var(--danger); }
-  .your-turn-badge { background: var(--gold); color: #1a1000; font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 20px; margin-left: auto; }
-
-  /* ACTION PANEL */
-  .action-panel { padding: 1rem; border-top: 1px solid var(--border); background: var(--surface); }
-  .dice-display { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1rem; }
-  .die { width: 50px; height: 50px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-family: 'Boogaloo', cursive; color: #1a1000; box-shadow: 0 4px 12px rgba(0,0,0,0.5); transition: transform 0.3s; }
-  .die.rolling { animation: diceRoll 0.4s ease; }
-  @keyframes diceRoll { 0%,100%{transform:rotate(0deg)} 25%{transform:rotate(-20deg) scale(1.1)} 75%{transform:rotate(20deg) scale(1.1)} }
-  .dice-dots { font-size: 2rem; }
-  .action-buttons { display: flex; flex-direction: column; gap: 0.5rem; }
-  .action-row { display: flex; gap: 0.5rem; }
-  .action-row .btn { flex: 1; }
-  .pending-card { background: var(--surface2); border: 1px solid var(--accent); border-radius: 10px; padding: 1rem; margin-bottom: 0.75rem; text-align: center; }
-  .pending-card h3 { color: var(--accent); margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
-  .pending-property { font-family: 'Boogaloo', cursive; font-size: 1.3rem; color: var(--gold); }
-  .pending-price { color: var(--success); font-size: 1.1rem; font-weight: 700; }
-
-  /* LOG */
-  .log-entry { font-size: 0.8rem; padding: 0.4rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--muted); line-height: 1.3; }
-  .log-entry.highlight { color: var(--text); }
-  .log-entry.warn { color: var(--danger); }
-  .log-entry.good { color: var(--success); }
-
-  /* PROPERTIES PANEL */
-  .prop-group { margin-bottom: 1rem; }
-  .prop-group-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 0.25rem 0.5rem; border-radius: 4px; margin-bottom: 0.4rem; }
-  .prop-item { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.5rem; background: var(--surface2); border-radius: 6px; margin-bottom: 0.3rem; font-size: 0.8rem; }
-  .prop-item .prop-flag { font-size: 0.9rem; }
-  .prop-item .prop-name { flex: 1; }
-  .prop-item .prop-houses { display: flex; gap: 2px; }
-  .h-pip { width: 8px; height: 8px; border-radius: 1px; }
-  .prop-build-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: 0.7rem; cursor: pointer; color: var(--text); }
-  .prop-build-btn:hover { border-color: var(--accent); }
-
-  /* AUCTION */
-  .auction-panel { background: var(--surface2); border: 1px solid var(--gold); border-radius: 10px; padding: 1rem; margin-bottom: 0.75rem; text-align: center; }
-  .auction-panel h3 { color: var(--gold); font-family: 'Boogaloo', cursive; font-size: 1.3rem; margin-bottom: 0.5rem; }
-  .auction-bid { font-size: 0.9rem; color: var(--muted); margin: 0.5rem 0; }
-  .auction-inputs { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
-  .auction-inputs input { flex: 1; }
-
-  /* MODAL */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; display: none; }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; max-width: 400px; width: 90%; text-align: center; }
-  .modal h2 { font-family: 'Boogaloo', cursive; font-size: 2rem; color: var(--gold); margin-bottom: 1rem; }
-
-  /* Space detail popup */
-  .space-detail { position: fixed; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; min-width: 200px; z-index: 100; display: none; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-  .space-detail.open { display: block; }
-  .space-detail h3 { font-family: 'Boogaloo', cursive; font-size: 1.3rem; color: var(--gold); }
-  .space-detail-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-  /* Responsive */
-  @media (max-width: 900px) {
-    #game-screen { flex-direction: column; }
-    .board { grid-template-columns: 55px repeat(9, 42px) 55px; grid-template-rows: 55px repeat(9, 42px) 55px; }
-    .sidebar { width: 100%; height: 40vh; border-left: none; border-top: 1px solid var(--border); }
-    .space .space-flag { font-size: 0.6rem; }
-    .board-title { font-size: 1.5rem; }
+    /* Paleta de colores estilo Richup (Claro y Moderno) */
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --border: #cbd5e1;
+    --text: #1e293b;
+    --muted: #64748b;
+    --accent: #4f46e5; /* Índigo vibrante */
+    --gold: #f59e0b;
+    --danger: #ef4444;
+    --success: #10b981;
+    
+    /* Colores de Propiedades */
+    --brown: #78350f; --teal: #06b6d4; --yellow: #eab308;
+    --purple: #a855f7; --orange: #f97316; --red: #e11d48;
+    --pink: #ec4899; --blue: #2563eb; --green: #16a34a;
+    --darkgreen: #064e3b; --lightblue: #7dd3fc;
   }
 
-  /* ─── TRADES ──────────────────────────────────────────────────────────────── */
-  .trade-modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 2000; opacity: 0; pointer-events: none;
-    transition: opacity 0.2s;
-  }
-  .trade-modal-overlay.open { opacity: 1; pointer-events: all; }
-  .trade-modal {
-    background: #1a1828; border: 1px solid #3a3460;
-    border-radius: 20px; width: 90%; max-width: 620px;
-    max-height: 90vh; overflow-y: auto; position: relative;
-    animation: tradeIn 0.25s ease;
-  }
-  @keyframes tradeIn { from { transform: scale(0.93) translateY(12px); } to { transform: scale(1) translateY(0); } }
-  .trade-modal-header {
-    text-align: center; padding: 1.5rem 1.5rem 0;
-    font-family: 'Boogaloo', cursive; font-size: 1.6rem; color: #c4aaff;
-  }
-  .trade-close-btn {
-    position: absolute; top: 1rem; right: 1rem;
-    width: 32px; height: 32px; border-radius: 50%;
-    background: #2e2a45; border: none; color: #e8e4f8;
-    font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s;
-  }
-  .trade-close-btn:hover { background: #e05252; }
-
-  /* Player select screen */
-  .trade-player-list { padding: 1rem 1.5rem 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; }
-  .trade-player-btn {
-    display: flex; align-items: center; gap: 0.75rem;
-    padding: 0.9rem 1.1rem; background: #231f35;
-    border: 1px solid #2e2a45; border-radius: 14px;
-    cursor: pointer; transition: border-color 0.15s, background 0.15s;
-    font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700; color: #e8e4f8;
-  }
-  .trade-player-btn:hover { border-color: #7c5cbf; background: #29244a; }
-  .trade-avatar {
-    width: 36px; height: 36px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 900; color: white; flex-shrink: 0;
-    border: 2px solid rgba(255,255,255,0.25);
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Nunito', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
   }
 
-  /* Trade builder */
-  .trade-builder { padding: 1rem 1.5rem 1.5rem; }
-  .trade-sides { display: grid; grid-template-columns: 1fr 40px 1fr; gap: 0; align-items: start; }
-  .trade-side { }
-  .trade-side-header {
-    display: flex; align-items: center; gap: 0.5rem;
-    margin-bottom: 0.75rem; padding-bottom: 0.5rem;
-    border-bottom: 1px solid #2e2a45;
-  }
-  .trade-side-name { font-weight: 800; font-size: 1rem; }
-  .trade-divider {
-    display: flex; align-items: center; justify-content: center; padding-top: 2rem;
-  }
-  .trade-swap-icon {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: #2e2a45; border: 1px solid #3a3460;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem; color: #c4aaff;
+  /* --- LAYOUT PRINCIPAL --- */
+  .game-container {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    padding: 20px;
+    gap: 20px;
   }
 
-  /* Cash slider */
-  .trade-cash-section { margin-bottom: 0.75rem; }
-  .trade-cash-label { font-size: 0.75rem; color: #8b85a8; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; }
-  .trade-cash-row { display: flex; align-items: center; gap: 0.5rem; }
-  .trade-cash-row input[type=range] {
-    flex: 1; accent-color: #7c5cbf;
-    height: 4px; appearance: none; background: #2e2a45; border-radius: 2px; border: none; padding: 0;
-  }
-  .trade-cash-row input[type=range]::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #7c5cbf; cursor: pointer; }
-  .trade-cash-pill {
-    background: #7c5cbf; color: white; border-radius: 20px;
-    padding: 2px 10px; font-family: 'Boogaloo', cursive; font-size: 0.95rem;
-    white-space: nowrap; min-width: 52px; text-align: center;
+  /* --- TABLERO (Grid 11x11) --- */
+  .board-wrapper {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* Property checkboxes */
-  .trade-props-label { font-size: 0.75rem; color: #8b85a8; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; }
-  .trade-prop-item {
-    display: flex; align-items: center; gap: 0.4rem;
-    padding: 0.4rem 0.5rem; border-radius: 8px;
-    margin-bottom: 0.3rem; cursor: pointer; transition: background 0.1s;
-    font-size: 0.82rem; font-weight: 600;
+  .board {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    grid-template-rows: repeat(11, 1fr);
+    width: min(90vh, 800px);
+    height: min(90vh, 800px);
+    background-color: var(--border);
+    border: 4px solid #475569;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    position: relative;
+    gap: 2px; /* Espacio para las líneas del tablero */
   }
-  .trade-prop-item:hover { background: #231f35; }
-  .trade-prop-item input[type=checkbox] { accent-color: #7c5cbf; width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
-  .trade-prop-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-  .trade-prop-name { flex: 1; }
-  .trade-prop-val { color: #f4c430; font-size: 0.75rem; }
 
-  /* Send button */
-  .trade-send-row { margin-top: 1.25rem; display: flex; gap: 0.75rem; justify-content: center; }
-  .btn-trade-send {
-    background: #7c5cbf; color: white; border: none;
-    border-radius: 12px; padding: 0.75rem 2rem;
-    font-family: 'Boogaloo', cursive; font-size: 1.2rem;
-    cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
-    transition: background 0.15s, transform 0.1s;
+  /* Centro del Tablero */
+  .board-center {
+    grid-column: 2 / 11;
+    grid-row: 2 / 11;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-image: radial-gradient(#f1f5f9 1px, transparent 1px);
+    background-size: 20px 20px;
   }
-  .btn-trade-send:hover { background: #9b7de0; }
-  .btn-trade-send:active { transform: scale(0.97); }
 
-  /* Incoming trade notification */
-  .trade-notification {
-    position: fixed; bottom: 1.5rem; right: 1.5rem;
-    background: #231f35; border: 1px solid #7c5cbf;
-    border-radius: 14px; padding: 1rem 1.25rem;
-    z-index: 3000; max-width: 280px;
-    animation: slideUp 0.3s ease;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  #center-ui {
+    text-align: center;
+    z-index: 10;
   }
-  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .trade-notification h4 { color: #c4aaff; font-family: 'Boogaloo', cursive; font-size: 1.1rem; margin-bottom: 0.25rem; }
-  .trade-notification p { color: #8b85a8; font-size: 0.82rem; margin-bottom: 0.75rem; }
-  .trade-notif-btns { display: flex; gap: 0.5rem; }
-  .trade-notif-btns button { flex: 1; padding: 0.45rem; border: none; border-radius: 8px; font-family: 'Boogaloo', cursive; font-size: 1rem; cursor: pointer; transition: opacity 0.15s; }
-  .btn-accept { background: #4caf6e; color: white; }
-  .btn-decline { background: #e05252; color: white; }
 
-  /* Trades tab in action panel */
-  .trade-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    background: #231f35; border: 1px solid #2e2a45; border-radius: 10px;
-    padding: 0.5rem 0.75rem; margin-bottom: 0.5rem;
-    font-size: 0.85rem; color: #8b85a8;
+  #roll-dice-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 18px 40px;
+    font-size: 1.8rem;
+    font-weight: 800;
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 8px 0 #3730a3;
+    transition: all 0.1s;
+    margin-bottom: 15px;
   }
-  .trade-bar-label { font-weight: 700; }
-  .btn-trade-create {
-    background: #7c5cbf; color: white; border: none;
-    border-radius: 8px; padding: 0.35rem 0.9rem;
-    font-family: 'Boogaloo', cursive; font-size: 1rem;
-    cursor: pointer; display: flex; align-items: center; gap: 0.3rem;
-    transition: background 0.15s;
+
+  #roll-dice-btn:hover { background: #4338ca; transform: translateY(-2px); }
+  #roll-dice-btn:active { transform: translateY(6px); box-shadow: 0 2px 0 #3730a3; }
+  #roll-dice-btn:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; transform: none; }
+
+  /* --- CASILLAS --- */
+  .space {
+    background: var(--surface);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-align: center;
+    overflow: hidden;
+    cursor: pointer;
   }
-  .btn-trade-create:hover { background: #9b7de0; }
 
-  /* Incoming trade detail in modal */
-  .trade-review-section { padding: 0.5rem 0; }
-  .trade-review-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.3rem 0; border-bottom: 1px solid #2e2a45; }
-  .trade-review-row span:first-child { color: #8b85a8; }
+  .space:hover { background: var(--surface2); }
 
+  .space .color-bar {
+    width: 100%;
+    height: 20%;
+    position: absolute;
+    top: 0; left: 0;
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+  }
+
+  /* Ajuste de barras de color según posición */
+  .bottom-row .color-bar { top: 0; }
+  .top-row .color-bar { bottom: 0; top: auto; }
+  .left-col .color-bar { right: 0; left: auto; width: 20%; height: 100%; border-bottom: none; border-left: 2px solid rgba(0,0,0,0.1); }
+  .right-col .color-bar { left: 0; right: auto; width: 20%; height: 100%; border-bottom: none; border-right: 2px solid rgba(0,0,0,0.1); }
+
+  .space.red .color-bar { background: var(--red); }
+  .space.blue .color-bar { background: var(--blue); }
+  .space.green .color-bar { background: var(--green); }
+  .space.yellow .color-bar { background: var(--yellow); }
+  .space.orange .color-bar { background: var(--orange); }
+  .space.pink .color-bar { background: var(--pink); }
+  .space.teal .color-bar { background: var(--teal); }
+  .space.brown .color-bar { background: var(--brown); }
+
+  /* Esquinas */
+  .space.go, .space.jail, .space.parking, .space.to_jail {
+    background: #f8fafc;
+    font-size: 0.9rem;
+  }
+
+  /* --- JUGADORES (ANIMACIONES) --- */
+  .player-token {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 3px solid white;
+    position: absolute;
+    z-index: 100;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28); /* Salto suave */
+  }
+
+  /* Mensajes flotantes ("Toasts") */
+  .toast {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    pointer-events: none;
+    animation: floatUp 2s ease-out forwards;
+  }
+
+  @keyframes floatUp {
+    0% { opacity: 0; transform: translate(-50%, 0); }
+    20% { opacity: 1; transform: translate(-50%, -15px); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -40px); }
+  }
+
+  /* --- SIDEBARS --- */
+  .sidebar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 350px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  }
+
+  .player-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: background 0.3s;
+  }
+  .player-card.active { border: 2px solid var(--accent); background: #f5f3ff; }
+
+  .cash { font-weight: 800; color: var(--success); }
+
+  /* --- LOG --- */
+  #log-container {
+    height: 200px;
+    overflow-y: auto;
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .log-entry { padding: 4px 0; border-bottom: 1px solid var(--surface2); }
+
+  /* Detalle de Casilla (Tooltip) */
+  #space-detail {
+    position: fixed;
+    width: 200px;
+    background: white;
+    border: 2px solid #334155;
+    border-radius: 8px;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  }
+  #space-detail.open { display: block; }
+  .sd-header { height: 40px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; border-radius: 6px 6px 0 0; }
+  .sd-body { padding: 10px; }
 </style>
 </head>
 <body>
 
-<!-- LOBBY -->
-<div id="lobby-screen" class="screen active">
-  <div class="lobby-hero">
-    <h1>🌍 Mr. Worldwide</h1>
-    <p>The global Monopoly experience</p>
-  </div>
-  <div class="lobby-card">
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('create')">Create Room</div>
-      <div class="tab" onclick="switchTab('join')">Join Room</div>
-    </div>
-
-    <div id="create-tab">
-      <div class="form-group">
-        <label>Your Name</label>
-        <input type="text" id="create-name" placeholder="Enter your name" maxlength="20">
-      </div>
-      <div class="form-group">
-        <label>Your Color</label>
-        <div class="color-picker" id="create-color-picker"></div>
-      </div>
-      <details style="margin-bottom:1rem; cursor:pointer;">
-        <summary style="color:var(--muted); font-size:0.9rem; font-weight:600;">⚙️ Game Settings</summary>
-        <div style="margin-top:1rem; display:flex; flex-direction:column; gap:0.75rem;">
-          <label class="setting-toggle">
-            <input type="checkbox" id="s-doublerent"> <span>×2 rent on full-set properties</span>
-          </label>
-          <label class="setting-toggle">
-            <input type="checkbox" id="s-vacation"> <span>Vacation cash pool</span>
-          </label>
-          <label class="setting-toggle">
-            <input type="checkbox" id="s-auction"> <span>Auction unsold properties</span>
-          </label>
-          <label class="setting-toggle">
-            <input type="checkbox" id="s-norentjail"> <span>Don't collect rent while in prison</span>
-          </label>
-          <label class="setting-toggle">
-            <input type="checkbox" id="s-mortgage"> <span>Mortgage enabled</span>
-          </label>
-          <label class="setting-toggle">
-            <input type="checkbox" id="s-evenbuild" checked> <span>Even build rule</span>
-          </label>
-          <label class="setting-toggle">
-            <input type="checkbox" id="s-randomorder" checked> <span>Randomize player order</span>
-          </label>
-          <div class="form-group">
-            <label>Starting Cash</label>
-            <select id="s-startcash">
-              <option value="1000">$1000</option>
-              <option value="1500" selected>$1500</option>
-              <option value="2000">$2000</option>
-              <option value="3000">$3000</option>
-            </select>
-          </div>
-        </div>
-      </details>
-      <button class="btn btn-primary btn-gold" onclick="createRoom()">🎲 Create Room</button>
-    </div>
-
-    <div id="join-tab" style="display:none;">
-      <div class="form-group">
-        <label>Your Name</label>
-        <input type="text" id="join-name" placeholder="Enter your name" maxlength="20">
-      </div>
-      <div class="form-group">
-        <label>Your Color</label>
-        <div class="color-picker" id="join-color-picker"></div>
-      </div>
-      <div class="form-group">
-        <label>Room Code</label>
-        <div class="room-code-input">
-          <input type="text" id="join-code" placeholder="XXXXXX" maxlength="6">
-          <button class="btn btn-primary" style="width:auto; margin:0;" onclick="joinByCode()">Join</button>
-        </div>
-      </div>
-      <div style="margin-top:1rem;">
-        <div style="color:var(--muted); font-size:0.85rem; margin-bottom:0.5rem;">Or pick an open room:</div>
-        <div class="room-list" id="room-list-display"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- WAITING ROOM -->
-<div id="waiting-screen" class="screen">
-  <div class="waiting-card">
-    <h2>🌐 Waiting for players...</h2>
-    <div>Share this code with friends:</div>
-    <div class="room-id-display" id="room-code-display">------</div>
-    <div id="waiting-players" class="player-slots"></div>
-    <div style="color:var(--muted); font-size:0.85rem; margin-bottom:1rem;">2–6 players needed</div>
-    <button class="btn btn-gold" id="start-btn" onclick="startGame()" disabled>▶ Start Game</button>
-  </div>
-</div>
-
-<!-- GAME -->
-<div id="game-screen" class="screen">
-  <!-- BOARD -->
-  <div class="board-container">
-    <div class="board" id="board">
-      <div class="board-center">
-        <div class="board-globe">🌍</div>
-        <div class="board-title">Mr. Worldwide</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SIDEBAR -->
+<div class="game-container">
   <div class="sidebar">
-    <div class="sidebar-tabs">
-      <div class="sidebar-tab active" onclick="showSideTab('players')">Players</div>
-      <div class="sidebar-tab" onclick="showSideTab('props')">Properties</div>
-      <div class="sidebar-tab" onclick="showSideTab('log')">Log</div>
+    <div class="panel">
+      <h2 style="margin:0 0 10px 0; font-size: 1.2rem;">Jugadores</h2>
+      <div id="players-list"></div>
     </div>
-    <div class="sidebar-content" id="sidebar-players"></div>
-    <div class="sidebar-content" id="sidebar-props" style="display:none;"></div>
-    <div class="sidebar-content" id="sidebar-log" style="display:none;"></div>
+    <div class="panel" style="flex:1;">
+      <h2 style="margin:0 0 10px 0; font-size: 1.2rem;">Actividad</h2>
+      <div id="log-container"></div>
+    </div>
+  </div>
 
-    <!-- ACTION PANEL -->
-    <div class="action-panel" id="action-panel">
-      <!-- TRADES BAR -->
-      <div class="trade-bar" id="trade-bar" style="display:none;">
-        <span class="trade-bar-label">💱 Trades</span>
-        <button class="btn-trade-create" onclick="openTradeModal()">+ Create</button>
+  <div class="board-wrapper">
+    <div class="board" id="board">
       </div>
-      <div class="dice-display">
-        <div class="die" id="die1">🎲</div>
-        <div class="die" id="die2">🎲</div>
-      </div>
-      <div id="pending-zone"></div>
-      <div id="auction-zone"></div>
-      <div class="action-buttons" id="action-buttons"></div>
+  </div>
+
+  <div class="sidebar">
+    <div id="action-panel" class="panel" style="display:none;">
+      <h3 id="action-title" style="margin:0 0 10px 0;">Acción Requerida</h3>
+      <div id="action-desc" style="margin-bottom:15px; font-size: 0.9rem;"></div>
+      <div id="action-buttons" style="display:grid; gap:10px;"></div>
+    </div>
+    
+    <div class="panel">
+      <h3 style="margin:0; font-size: 1rem;">Tus Propiedades</h3>
+      <div id="my-properties" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:5px; margin-top:10px;"></div>
     </div>
   </div>
 </div>
 
-<!-- WINNER MODAL -->
-<div class="modal-overlay" id="winner-modal">
-  <div class="modal">
-    <div style="font-size:4rem;">🏆</div>
-    <h2 id="winner-name"></h2>
-    <p style="color:var(--muted); margin-bottom:1.5rem;">wins Mr. Worldwide!</p>
-    <button class="btn btn-gold" onclick="location.reload()">Play Again</button>
-  </div>
+<div id="space-detail">
+  <div id="sd-header" class="sd-header"></div>
+  <div id="sd-body" class="sd-body"></div>
 </div>
 
-<!-- SPACE DETAIL -->
-<div class="space-detail" id="space-detail" onclick="closeSpaceDetail()">
-  <h3 id="sd-name"></h3>
-  <div id="sd-body"></div>
-</div>
-
-<!-- TRADE MODAL -->
-<div class="trade-modal-overlay" id="trade-modal-overlay">
-  <div class="trade-modal" id="trade-modal">
-    <button class="trade-close-btn" onclick="closeTrade()">✕</button>
-
-    <!-- Step 1: Pick player -->
-    <div id="trade-step-player">
-      <div class="trade-modal-header">💱 Create a trade</div>
-      <p style="text-align:center; color:#8b85a8; font-size:0.88rem; margin:0.5rem 0 0;">Select a player to trade with:</p>
-      <div class="trade-player-list" id="trade-player-list"></div>
-    </div>
-
-    <!-- Step 2: Build trade -->
-    <div id="trade-step-build" style="display:none;">
-      <div class="trade-modal-header">💱 Create a trade</div>
-      <div class="trade-builder">
-        <div class="trade-sides">
-          <!-- MY SIDE -->
-          <div class="trade-side" id="trade-my-side">
-            <div class="trade-side-header">
-              <div class="trade-avatar" id="trade-my-avatar"></div>
-              <span class="trade-side-name" id="trade-my-name"></span>
-            </div>
-            <div class="trade-cash-section">
-              <div class="trade-cash-label">Cash offer</div>
-              <div class="trade-cash-row">
-                <input type="range" id="trade-my-cash" min="0" max="1500" value="0" step="10" oninput="updateTradeCash('my')">
-                <div class="trade-cash-pill" id="trade-my-cash-pill">0 $</div>
-              </div>
-            </div>
-            <div class="trade-props-label">Your properties</div>
-            <div id="trade-my-props"></div>
-          </div>
-
-          <!-- DIVIDER -->
-          <div class="trade-divider">
-            <div class="trade-swap-icon">⇄</div>
-          </div>
-
-          <!-- THEIR SIDE -->
-          <div class="trade-side" id="trade-their-side">
-            <div class="trade-side-header">
-              <div class="trade-avatar" id="trade-their-avatar"></div>
-              <span class="trade-side-name" id="trade-their-name"></span>
-            </div>
-            <div class="trade-cash-section">
-              <div class="trade-cash-label">Cash offer</div>
-              <div class="trade-cash-row">
-                <input type="range" id="trade-their-cash" min="0" max="1400" value="0" step="10" oninput="updateTradeCash('their')">
-                <div class="trade-cash-pill" id="trade-their-cash-pill">0 $</div>
-              </div>
-            </div>
-            <div class="trade-props-label">Their properties</div>
-            <div id="trade-their-props"></div>
-          </div>
-        </div>
-
-        <div class="trade-send-row">
-          <button class="btn-trade-send" onclick="sendTrade()">
-            <span>⟶</span> Send trade
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Step 3: Review incoming trade -->
-    <div id="trade-step-review" style="display:none;">
-      <div class="trade-modal-header">📨 Trade offer</div>
-      <div class="trade-builder">
-        <div id="trade-review-body"></div>
-        <div class="trade-send-row">
-          <button class="btn-trade-send" style="background:#4caf6e;" onclick="respondToTrade(true)">✓ Accept</button>
-          <button class="btn-trade-send" style="background:#e05252;" onclick="respondToTrade(false)">✗ Decline</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- TRADE NOTIFICATIONS -->
-<div id="trade-notifications"></div>
-
-<style>
-.setting-toggle { display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; cursor:pointer; }
-.setting-toggle input { accent-color: var(--accent); width:16px; height:16px; }
-</style>
-
+<script src="/socket.io/socket.io.js"></script>
 <script>
-const DICE_FACES = ['', '⚀','⚁','⚂','⚃','⚄','⚅'];
-const PLAYER_COLORS = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c'];
-const COLOR_HEX = { brown:'#8B4513', teal:'#008B8B', yellow:'#DAA520', purple:'#7B2D8B', orange:'#FF8C00', red:'#DC143C', pink:'#C71585', blue:'#0066CC', green:'#006400', lightblue:'#4169E1', darkgreen:'#228B22' };
+  let socket = io();
+  let gameState = null;
+  let myPlayerId = null;
+  const boardData = []; // Esto debería venir de tu boardData.js compartido o cargado
 
-let ws = null;
-let myId = null;
-let myPlayerId = null;
-let roomId = null;
-let gameState = null;
-let selectedCreate = PLAYER_COLORS[0];
-let selectedJoin = PLAYER_COLORS[1];
-let currentSideTab = 'players';
+  // --- LÓGICA DE RENDERIZADO DEL TABLERO ---
+  function renderBoard() {
+    const boardEl = document.getElementById('board');
+    boardEl.innerHTML = '';
 
-// BOARD LAYOUT: 40 spaces in order 0-39
-// Bottom: 0(GO),1-9, 10(jail) — going right
-// Right:  11-19 going up
-// Top:    20(free park),21-29, 30(go to jail) — going left  
-// Left:   31-39 going down
-const BOARD_LAYOUT = (() => {
-  // Returns {row, col, side} for each space 0-39
-  const layout = [];
-  // Bottom row (row 11): positions 0-10 left to right
-  for (let i = 0; i <= 10; i++) layout[i] = { row: 11, col: i, side: 'bottom' };
-  // Right col (col 10): positions 11-19 bottom to top
-  for (let i = 0; i <= 8; i++) layout[11 + i] = { row: 10 - i, col: 10, side: 'right' };
-  // Top row (row 0): positions 20-30 right to left
-  for (let i = 0; i <= 10; i++) layout[20 + i] = { row: 0, col: 10 - i, side: 'top' };
-  // Left col (col 0): positions 31-39 top to bottom
-  for (let i = 0; i <= 8; i++) layout[31 + i] = { row: 1 + i, col: 0, side: 'left' };
-  return layout;
-})();
-
-// Color pickers
-function initColorPickers() {
-  ['create-color-picker', 'join-color-picker'].forEach((id, idx) => {
-    const el = document.getElementById(id);
-    el.innerHTML = '';
-    PLAYER_COLORS.forEach(c => {
-      const sw = document.createElement('div');
-      sw.className = 'color-swatch' + (c === (idx === 0 ? selectedCreate : selectedJoin) ? ' selected' : '');
-      sw.style.background = c;
-      sw.onclick = () => {
-        el.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-        sw.classList.add('selected');
-        if (idx === 0) selectedCreate = c; else selectedJoin = c;
-      };
-      el.appendChild(sw);
-    });
-  });
-}
-
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('create-tab').style.display = tab === 'create' ? '' : 'none';
-  document.getElementById('join-tab').style.display = tab === 'join' ? '' : 'none';
-}
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function showSideTab(tab) {
-  currentSideTab = tab;
-  document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('sidebar-players').style.display = tab === 'players' ? '' : 'none';
-  document.getElementById('sidebar-props').style.display = tab === 'props' ? '' : 'none';
-  document.getElementById('sidebar-log').style.display = tab === 'log' ? '' : 'none';
-}
-
-// WebSocket
-function connect() {
-  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  ws = new WebSocket(`${proto}//${location.host}`);
-
-  ws.onmessage = (e) => {
-    const msg = JSON.parse(e.data);
-    handleMessage(msg);
-  };
-
-  ws.onclose = () => setTimeout(connect, 2000);
-  ws.onerror = () => {};
-}
-
-function send(type, payload = {}) {
-  if (ws && ws.readyState === 1) ws.send(JSON.stringify({ type, payload }));
-}
-
-function handleMessage(msg) {
-  switch (msg.type) {
-    case 'connected':
-      myId = msg.clientId;
-      renderRoomList(msg.rooms || []);
-      break;
-    case 'room_list':
-      renderRoomList(msg.rooms || []);
-      break;
-    case 'joined_room':
-      myPlayerId = msg.playerId;
-      roomId = msg.roomId;
-      gameState = msg.state;
-      document.getElementById('room-code-display').textContent = roomId;
-      showScreen('waiting-screen');
-      renderWaiting();
-      break;
-    case 'state_update':
-      gameState = msg.state;
-      if (gameState.phase === 'playing' || gameState.phase === 'ended') {
-        showScreen('game-screen');
-        renderGame();
-      } else {
-        renderWaiting();
-      }
-      if (gameState.winner) {
-        document.getElementById('winner-name').textContent = gameState.winner.name;
-        document.getElementById('winner-modal').classList.add('open');
-      }
-      break;
-    case 'error':
-      alert(msg.msg);
-      break;
-    case 'trade_incoming':
-      // Small delay to let state_update arrive first
-      setTimeout(() => showTradeNotification(msg.tradeId), 150);
-      break;
-  }
-}
-
-function renderRoomList(rooms) {
-  const el = document.getElementById('room-list-display');
-  el.innerHTML = rooms.length === 0 ? '<div style="color:var(--muted); text-align:center; font-size:0.85rem;">No open rooms</div>' : '';
-  rooms.forEach(r => {
-    if (r.phase !== 'waiting') return;
-    const item = document.createElement('div');
-    item.className = 'room-item';
-    item.innerHTML = `<span class="room-id">${r.id}</span><span class="room-info">${r.playerCount}/6 players · ${r.players.slice(0,2).join(', ')}</span>`;
-    item.onclick = () => { document.getElementById('join-code').value = r.id; };
-    el.appendChild(item);
-  });
-}
-
-function createRoom() {
-  const name = document.getElementById('create-name').value.trim();
-  if (!name) { alert('Enter your name'); return; }
-  const settings = {
-    doubleRentFullSet: document.getElementById('s-doublerent').checked,
-    vacationCash: document.getElementById('s-vacation').checked,
-    auction: document.getElementById('s-auction').checked,
-    noRentInJail: document.getElementById('s-norentjail').checked,
-    mortgage: document.getElementById('s-mortgage').checked,
-    evenBuild: document.getElementById('s-evenbuild').checked,
-    randomizeOrder: document.getElementById('s-randomorder').checked,
-    startingCash: parseInt(document.getElementById('s-startcash').value),
-  };
-  send('create_room', { name, color: selectedCreate, settings });
-}
-
-function joinByCode() {
-  const name = document.getElementById('join-name').value.trim();
-  const code = document.getElementById('join-code').value.trim().toUpperCase();
-  if (!name) { alert('Enter your name'); return; }
-  if (!code) { alert('Enter a room code'); return; }
-  send('join_room', { name, color: selectedJoin, roomId: code });
-}
-
-function startGame() {
-  send('start_game');
-}
-
-function renderWaiting() {
-  if (!gameState) return;
-  const ps = document.getElementById('waiting-players');
-  ps.innerHTML = '';
-  gameState.players.forEach(p => {
-    const el = document.createElement('div');
-    el.className = 'player-slot';
-    el.style.background = p.color + '33';
-    el.style.border = `2px solid ${p.color}`;
-    el.style.color = p.color;
-    el.textContent = p.name;
-    ps.appendChild(el);
-  });
-  const startBtn = document.getElementById('start-btn');
-  const isHost = gameState.players[0]?.id === myPlayerId;
-  startBtn.disabled = !isHost || gameState.players.length < 2;
-  startBtn.textContent = isHost ? '▶ Start Game' : 'Waiting for host...';
-}
-
-// ─── BOARD RENDERING ──────────────────────────────────────────────────────────
-function renderBoard() {
-  if (!gameState) return;
-  const board = document.getElementById('board');
-  // Clear old spaces (keep center)
-  board.querySelectorAll('.space').forEach(el => el.remove());
-
-  gameState.board.forEach((space, idx) => {
-    const pos = BOARD_LAYOUT[idx];
-    if (!pos) return;
-    const el = document.createElement('div');
-    el.className = `space ${pos.side}`;
-    el.dataset.id = idx;
-    el.style.gridRow = pos.row + 1;
-    el.style.gridColumn = pos.col + 1;
-
-    // Background
-    el.style.background = '#0d4d0d';
-
-    let html = '';
-    const prop = gameState.properties[space.id];
-    const owner = prop?.ownerId ? gameState.players.find(p => p.id === prop.ownerId) : null;
-
-    if (['go','jail','go_to_jail','free_parking','vacation','passing'].includes(space.type)) {
-      el.classList.add('corner');
-      const icons = { go:'⭐', jail:'🔒', go_to_jail:'👮', free_parking:'🅿️', vacation:'🏖️', passing:'👋' };
-      html = `<div class="corner-text">${icons[space.type] || ''}</div><div class="space-name" style="font-size:0.45rem;">${space.name}</div>`;
-    } else if (space.type === 'treasure') {
-      html = `<div style="font-size:1rem;">📦</div><div class="space-name">Treasure</div>`;
-    } else if (space.type === 'surprise') {
-      html = `<div style="font-size:1rem;">❓</div><div class="space-name">Surprise</div>`;
-    } else if (space.type === 'tax') {
-      html = `<div style="font-size:0.9rem;">💸</div><div class="space-name">${space.name}</div><div class="space-price">${space.label || ''}</div>`;
-    } else if (space.type === 'railroad') {
-      html = `<div style="font-size:0.9rem;">✈️</div><div class="space-name">${space.name}</div><div class="space-price">$${space.price}</div>`;
-      if (owner) { html += `<div style="width:8px;height:8px;border-radius:50%;background:${owner.color};position:absolute;top:2px;right:2px;"></div>`; }
-    } else if (space.type === 'utility') {
-      html = `<div style="font-size:0.9rem;">${space.flag}</div><div class="space-name">${space.name}</div><div class="space-price">$${space.price}</div>`;
-    } else if (space.type === 'property') {
-      const colorHex = COLOR_HEX[space.color] || '#888';
-      const barSide = pos.side;
-      html = `<div class="color-bar ${barSide}" style="background:${colorHex};"></div>`;
-      html += `<div class="space-flag">${space.flag || ''}</div>`;
-      html += `<div class="space-name">${space.name}</div>`;
-      html += `<div class="space-price">$${space.price}</div>`;
-      if (prop?.mortgaged) html += `<div style="font-size:0.5rem;color:#f39c12;">MORT</div>`;
-      if (owner) {
-        html += `<div style="width:6px;height:6px;border-radius:50%;background:${owner.color};position:absolute;${barSide==='top'?'bottom:2px':'top:'+(barSide==='bottom'?'auto':'')+''};right:2px;"></div>`;
-      }
-      // House/hotel icons
-      if (prop?.houses > 0) {
-        const h = prop.houses;
-        html += `<div class="house-icons">`;
-        if (h === 5) html += `<div class="hotel-icon"></div>`;
-        else for (let i = 0; i < h; i++) html += `<div class="house-icon"></div>`;
-        html += `</div>`;
-      }
-    }
-
-    el.innerHTML = html;
-    el.onclick = () => showSpaceDetail(space.id, el);
-    board.appendChild(el);
-  });
-
-  renderTokens();
-}
-
-function renderTokens() {
-  if (!gameState) return;
-  // Remove old tokens
-  document.querySelectorAll('.token').forEach(t => t.remove());
-
-  const board = document.getElementById('board');
-  const boardRect = board.getBoundingClientRect();
-
-  gameState.players.forEach((player, pi) => {
-    if (player.bankrupt) return;
-    const pos = BOARD_LAYOUT[player.position];
-    if (!pos) return;
-    // Find the space element
-    const spaceEl = board.querySelector(`.space[data-id="${player.position}"]`);
-    if (!spaceEl) return;
-    const rect = spaceEl.getBoundingClientRect();
-
-    const token = document.createElement('div');
-    token.className = 'token';
-    token.style.background = player.color;
-    token.style.left = (rect.left - boardRect.left + rect.width/2 + (pi%3)*12 - 12) + 'px';
-    token.style.top = (rect.top - boardRect.top + rect.height/2 + Math.floor(pi/3)*12 - 4) + 'px';
-    token.style.position = 'absolute';
-    token.textContent = player.name[0].toUpperCase();
-    board.style.position = 'relative';
-    board.appendChild(token);
-  });
-}
-
-// ─── SIDEBAR ──────────────────────────────────────────────────────────────────
-function renderGame() {
-  renderBoard();
-  renderPlayers();
-  renderProperties();
-  renderLog();
-  renderActions();
-  // Show trade bar during active game
-  const tradeBar = document.getElementById('trade-bar');
-  if (tradeBar) tradeBar.style.display = gameState.phase === 'playing' ? '' : 'none';
-  // Check for incoming trades
-  checkIncomingTrades();
-}
-
-function renderPlayers() {
-  const el = document.getElementById('sidebar-players');
-  el.innerHTML = '';
-  gameState.players.forEach((p, i) => {
-    const isActive = i === gameState.currentPlayerIndex;
-    const isMe = p.id === myPlayerId;
-    const div = document.createElement('div');
-    div.className = `player-card ${isActive ? 'active-turn' : ''} ${p.bankrupt ? 'bankrupt' : ''}`;
-    div.innerHTML = `
-      <div class="player-header">
-        <div class="player-token" style="background:${p.color}">${p.name[0]}</div>
-        <div>
-          <div class="player-name">${p.name}${isMe ? ' (you)' : ''}</div>
-          <div class="player-status">${p.inJail ? '🔒 In Jail' : ''} ${p.bankrupt ? '💀 Bankrupt' : ''}</div>
-        </div>
-        ${isActive ? '<span class="your-turn-badge">TURN</span>' : ''}
-      </div>
-      <div class="player-cash">$${p.cash.toLocaleString()}</div>
-      ${p.jailFreeCards > 0 ? `<div style="font-size:0.75rem;color:var(--success);">🎫 Get Out of Jail ×${p.jailFreeCards}</div>` : ''}
-    `;
-    el.appendChild(div);
-  });
-}
-
-function renderProperties() {
-  const el = document.getElementById('sidebar-props');
-  el.innerHTML = '';
-
-  // Group by color, then by owner
-  const groups = {};
-  gameState.board.forEach(space => {
-    if (!['property','railroad','utility'].includes(space.type)) return;
-    const prop = gameState.properties[space.id];
-    if (!prop?.ownerId) return;
-    const owner = gameState.players.find(p => p.id === prop.ownerId);
-    if (!owner) return;
-    const key = owner.id;
-    if (!groups[key]) groups[key] = { owner, props: [] };
-    groups[key].props.push({ space, prop });
-  });
-
-  Object.values(groups).forEach(({ owner, props }) => {
-    const isMe = owner.id === myPlayerId;
-    const section = document.createElement('div');
-    section.className = 'prop-group';
-    section.innerHTML = `<div class="prop-group-title" style="background:${owner.color}33; color:${owner.color};">${owner.name}</div>`;
-
-    props.forEach(({ space, prop }) => {
-      const colorHex = COLOR_HEX[space.color] || '#888';
-      const row = document.createElement('div');
-      row.className = 'prop-item';
-      let houseHtml = '';
-      if (space.type === 'property') {
-        if (prop.houses === 5) houseHtml = `<div class="h-pip" style="background:#cc2200;width:10px;"></div>`;
-        else for (let i = 0; i < prop.houses; i++) houseHtml += `<div class="h-pip" style="background:#00cc44;"></div>`;
-      }
-      row.innerHTML = `
-        <div style="width:8px;height:8px;border-radius:2px;background:${colorHex};flex-shrink:0;"></div>
-        <span class="prop-flag">${space.flag||''}</span>
-        <span class="prop-name">${space.name}${prop.mortgaged?' (M)':''}</span>
-        <div class="prop-houses">${houseHtml}</div>
-        ${isMe && space.type === 'property' && !prop.mortgaged ? `<button class="prop-build-btn" onclick="buildHouse(${space.id})">🏠+</button>` : ''}
-        ${isMe && space.type === 'property' && prop.houses > 0 ? `<button class="prop-build-btn" onclick="sellHouse(${space.id})">-</button>` : ''}
-      `;
-      section.appendChild(row);
-    });
-
-    el.appendChild(section);
-  });
-
-  if (el.innerHTML === '') el.innerHTML = '<div style="color:var(--muted); font-size:0.85rem; text-align:center;">No properties owned yet</div>';
-}
-
-function renderLog() {
-  const el = document.getElementById('sidebar-log');
-  el.innerHTML = '';
-  [...gameState.log].reverse().forEach(entry => {
-    const div = document.createElement('div');
-    div.className = 'log-entry';
-    if (entry.msg.includes('BANKRUPT') || entry.msg.includes('jail') || entry.msg.includes('Jail')) div.classList.add('warn');
-    if (entry.msg.includes('collect') || entry.msg.includes('Collect') || entry.msg.includes('passed GO') || entry.msg.includes('wins')) div.classList.add('good');
-    div.textContent = entry.msg;
-    el.appendChild(div);
-  });
-}
-
-function renderActions() {
-  const isMyTurn = gameState.players[gameState.currentPlayerIndex]?.id === myPlayerId;
-  const player = gameState.players.find(p => p.id === myPlayerId);
-  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-
-  // Dice
-  const [d1, d2] = gameState.dice;
-  document.getElementById('die1').textContent = d1 ? DICE_FACES[d1] : '🎲';
-  document.getElementById('die2').textContent = d2 ? DICE_FACES[d2] : '🎲';
-
-  // Pending
-  const pendingZone = document.getElementById('pending-zone');
-  pendingZone.innerHTML = '';
-  if (gameState.pendingAction?.type === 'buy_property' && isMyTurn) {
-    const space = gameState.board[gameState.pendingAction.spaceId];
-    pendingZone.innerHTML = `
-      <div class="pending-card">
-        <h3>Buy Property?</h3>
-        <div class="pending-property">${space.flag || ''} ${space.name}</div>
-        <div class="pending-price">$${space.price}</div>
-        <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
-          <button class="btn btn-success" style="flex:1;" onclick="buyProperty()">✓ Buy</button>
-          <button class="btn btn-danger" style="flex:1;" onclick="declineProperty()">✗ Pass</button>
-        </div>
+    // 1. Crear Centro
+    const center = document.createElement('div');
+    center.className = 'board-center';
+    center.innerHTML = `
+      <div id="center-ui">
+        <div id="dice-visual" style="font-size: 4rem; margin-bottom: 10px;">🎲🎲</div>
+        <button id="roll-dice-btn" onclick="sendAction('roll_dice')">TIRAR DADOS</button>
+        <div id="turn-msg" style="font-weight: 700; color: var(--muted);">Esperando...</div>
       </div>
     `;
-  }
+    boardEl.appendChild(center);
 
-  // Auction
-  const auctionZone = document.getElementById('auction-zone');
-  auctionZone.innerHTML = '';
-  if (gameState.auctionState) {
-    const { spaceId, highestBid, highestBidder } = gameState.auctionState;
-    const space = gameState.board[spaceId];
-    const bidderName = highestBidder ? gameState.players.find(p => p.id === highestBidder)?.name : 'No one';
-    auctionZone.innerHTML = `
-      <div class="auction-panel">
-        <h3>🔨 Auction: ${space.name}</h3>
-        <div class="auction-bid">Highest bid: $${highestBid} by ${bidderName}</div>
-        <div class="auction-inputs">
-          <input type="number" id="bid-amount" placeholder="Your bid" min="${highestBid + 1}" style="flex:1;">
-          <button class="btn btn-gold" onclick="placeBid()" style="width:auto;">Bid</button>
-        </div>
-        ${isMyTurn ? `<button class="btn btn-secondary" style="margin-top:0.5rem;" onclick="endAuction()">End Auction</button>` : ''}
-      </div>
-    `;
-  }
+    // 2. Generar 40 Casillas
+    // Usamos el layout de Monopoly: 0-10 abajo, 11-20 izq, 21-30 arriba, 31-39 der.
+    for(let i=0; i<40; i++) {
+      const space = gameState.board[i];
+      const el = document.createElement('div');
+      el.className = `space ${space.type || ''} ${space.color || ''}`;
+      el.id = `space-${i}`;
+      
+      // Determinar posición en el Grid 11x11
+      let row, col, sideClass;
+      if (i >= 0 && i <= 10) { row = 11; col = 11 - i; sideClass = 'bottom-row'; }
+      else if (i > 10 && i <= 20) { col = 1; row = 11 - (i - 10); sideClass = 'left-col'; }
+      else if (i > 20 && i <= 30) { row = 1; col = i - 19; sideClass = 'top-row'; }
+      else { col = 11; row = i - 29; sideClass = 'right-col'; }
 
-  // Main action buttons
-  const btns = document.getElementById('action-buttons');
-  btns.innerHTML = '';
+      el.style.gridRow = row;
+      el.style.gridColumn = col;
+      el.classList.add(sideClass);
 
-  if (gameState.phase !== 'playing') return;
-
-  if (isMyTurn && !gameState.pendingAction) {
-    // Roll button
-    const rollBtn = document.createElement('button');
-    rollBtn.className = 'btn btn-gold';
-    rollBtn.textContent = '🎲 Roll Dice';
-    rollBtn.onclick = rollDice;
-    btns.appendChild(rollBtn);
-
-    // Jail options
-    if (player?.inJail) {
-      const row = document.createElement('div');
-      row.className = 'action-row';
-      const payBtn = document.createElement('button');
-      payBtn.className = 'btn btn-secondary';
-      payBtn.textContent = '💰 Pay $50';
-      payBtn.onclick = payJail;
-      row.appendChild(payBtn);
-      if (player.jailFreeCards > 0) {
-        const cardBtn = document.createElement('button');
-        cardBtn.className = 'btn btn-secondary';
-        cardBtn.textContent = '🎫 Use Card';
-        cardBtn.onclick = useJailCard;
-        row.appendChild(cardBtn);
-      }
-      btns.appendChild(row);
+      // Contenido de la casilla
+      let content = '';
+      if(space.color) content += `<div class="color-bar"></div>`;
+      content += `<div style="margin-top: ${space.color?'25%':'5px'}">${space.flag || ''} ${space.name}</div>`;
+      if(space.price) content += `<div style="color:var(--success)">$${space.price}</div>`;
+      
+      el.innerHTML = content;
+      el.onclick = (e) => showSpaceDetail(e, i);
+      boardEl.appendChild(el);
     }
-
-    // Bankruptcy
-    if (player && player.cash < 0) {
-      const bkBtn = document.createElement('button');
-      bkBtn.className = 'btn btn-danger';
-      bkBtn.textContent = '💀 Declare Bankruptcy';
-      bkBtn.onclick = () => { if (confirm('Declare bankruptcy?')) send('declare_bankruptcy'); };
-      btns.appendChild(bkBtn);
-    }
-  }
-
-  // Always show current turn info
-  const info = document.createElement('div');
-  info.style.textAlign = 'center';
-  info.style.color = 'var(--muted)';
-  info.style.fontSize = '0.8rem';
-  info.style.marginTop = '0.5rem';
-  info.textContent = isMyTurn ? "It's your turn!" : `Waiting for ${currentPlayer?.name}...`;
-  btns.appendChild(info);
-}
-
-// ─── TRADE SYSTEM ─────────────────────────────────────────────────────────────
-let tradeState = {
-  step: null,         // 'player' | 'build' | 'review'
-  targetId: null,
-  myProps: new Set(),
-  theirProps: new Set(),
-  reviewTradeId: null,
-};
-
-function openTradeModal() {
-  if (!gameState || gameState.phase !== 'playing') return;
-  tradeState = { step: 'player', targetId: null, myProps: new Set(), theirProps: new Set(), reviewTradeId: null };
-  showTradeStep('player');
-  renderTradePlayerList();
-  document.getElementById('trade-modal-overlay').classList.add('open');
-}
-
-function closeTrade() {
-  document.getElementById('trade-modal-overlay').classList.remove('open');
-  tradeState.step = null;
-}
-
-function showTradeStep(step) {
-  ['player', 'build', 'review'].forEach(s => {
-    document.getElementById(`trade-step-${s}`).style.display = s === step ? '' : 'none';
-  });
-  tradeState.step = step;
-}
-
-function renderTradePlayerList() {
-  const el = document.getElementById('trade-player-list');
-  el.innerHTML = '';
-  const me = gameState.players.find(p => p.id === myPlayerId);
-  gameState.players.forEach(p => {
-    if (p.id === myPlayerId || p.bankrupt) return;
-    const btn = document.createElement('button');
-    btn.className = 'trade-player-btn';
-    btn.innerHTML = `
-      <div class="trade-avatar" style="background:${p.color};">${p.name[0]}</div>
-      <span>${p.name}</span>
-      <span style="margin-left:auto;color:#f4c430;font-family:'Boogaloo',cursive;">$${p.cash.toLocaleString()}</span>
-    `;
-    btn.onclick = () => selectTradeTarget(p.id);
-    el.appendChild(btn);
-  });
-}
-
-function selectTradeTarget(targetId) {
-  tradeState.targetId = targetId;
-  tradeState.myProps = new Set();
-  tradeState.theirProps = new Set();
-  showTradeStep('build');
-  renderTradeBuildUI();
-}
-
-function renderTradeBuildUI() {
-  const me = gameState.players.find(p => p.id === myPlayerId);
-  const them = gameState.players.find(p => p.id === tradeState.targetId);
-  if (!me || !them) return;
-
-  // Avatars & names
-  const myAvatar = document.getElementById('trade-my-avatar');
-  myAvatar.textContent = me.name[0];
-  myAvatar.style.background = me.color;
-  document.getElementById('trade-my-name').textContent = me.name;
-
-  const theirAvatar = document.getElementById('trade-their-avatar');
-  theirAvatar.textContent = them.name[0];
-  theirAvatar.style.background = them.color;
-  document.getElementById('trade-their-name').textContent = them.name;
-
-  // Cash sliders
-  const myCashSlider = document.getElementById('trade-my-cash');
-  myCashSlider.max = me.cash;
-  myCashSlider.value = 0;
-  document.getElementById('trade-my-cash-pill').textContent = '0 $';
-
-  const theirCashSlider = document.getElementById('trade-their-cash');
-  theirCashSlider.max = them.cash;
-  theirCashSlider.value = 0;
-  document.getElementById('trade-their-cash-pill').textContent = '0 $';
-
-  // My properties
-  renderTradeProps('trade-my-props', myPlayerId, tradeState.myProps, 'my');
-  // Their properties
-  renderTradeProps('trade-their-props', tradeState.targetId, tradeState.theirProps, 'their');
-}
-
-function renderTradeProps(containerId, ownerId, selectedSet, side) {
-  const el = document.getElementById(containerId);
-  el.innerHTML = '';
-  let hasAny = false;
-
-  gameState.board.forEach(space => {
-    if (!['property', 'railroad', 'utility'].includes(space.type)) return;
-    const prop = gameState.properties[space.id];
-    if (!prop || prop.ownerId !== ownerId) return;
-    hasAny = true;
-
-    const colorHex = COLOR_HEX[space.color] || '#888';
-    const item = document.createElement('label');
-    item.className = 'trade-prop-item';
-    const checked = selectedSet.has(space.id);
-    item.innerHTML = `
-      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleTradeProp(${space.id}, '${side}', this.checked)">
-      <div class="trade-prop-dot" style="background:${colorHex};"></div>
-      <span class="trade-prop-name">${space.flag || ''}  ${space.name}${prop.mortgaged ? ' (M)' : ''}</span>
-      <span class="trade-prop-val">$${space.price}</span>
-    `;
-    el.appendChild(item);
-  });
-
-  if (!hasAny) {
-    el.innerHTML = `<div style="color:#8b85a8; font-size:0.8rem; text-align:center; padding:0.5rem 0;">No properties</div>`;
-  }
-}
-
-function toggleTradeProp(spaceId, side, checked) {
-  const set = side === 'my' ? tradeState.myProps : tradeState.theirProps;
-  if (checked) set.add(spaceId); else set.delete(spaceId);
-}
-
-function updateTradeCash(side) {
-  const val = document.getElementById(`trade-${side}-cash`).value;
-  document.getElementById(`trade-${side}-cash-pill`).textContent = `${val} $`;
-}
-
-function sendTrade() {
-  if (!tradeState.targetId) return;
-  const fromCash = parseInt(document.getElementById('trade-my-cash').value) || 0;
-  const toCash = parseInt(document.getElementById('trade-their-cash').value) || 0;
-  const me = gameState.players.find(p => p.id === myPlayerId);
-
-  if (tradeState.myProps.size === 0 && tradeState.theirProps.size === 0 && fromCash === 0 && toCash === 0) {
-    alert('Add something to the trade first!');
-    return;
-  }
-
-  send('propose_trade', {
-    toId: tradeState.targetId,
-    offer: {
-      fromCash,
-      toCash,
-      fromProps: [...tradeState.myProps],
-      toProps: [...tradeState.theirProps],
-    }
-  });
-  closeTrade();
-}
-
-// ── Incoming trade notification ──
-function showTradeNotification(tradeId) {
-  const trade = gameState?.pendingTrades?.[tradeId];
-  if (!trade) return;
-  const from = gameState.players.find(p => p.id === trade.fromId);
-  if (!from) return;
-
-  // Remove old notifications for this trade
-  const existing = document.getElementById(`trade-notif-${tradeId}`);
-  if (existing) existing.remove();
-
-  const container = document.getElementById('trade-notifications');
-  const notif = document.createElement('div');
-  notif.className = 'trade-notification';
-  notif.id = `trade-notif-${tradeId}`;
-
-  const propCount = (trade.fromProps?.length || 0) + (trade.toProps?.length || 0);
-  const cashSummary = [];
-  if (trade.fromCash > 0) cashSummary.push(`offers $${trade.fromCash}`);
-  if (trade.toCash > 0) cashSummary.push(`wants $${trade.toCash}`);
-  const summary = [propCount > 0 ? `${propCount} prop(s)` : null, ...cashSummary].filter(Boolean).join(' · ') || 'A deal';
-
-  notif.innerHTML = `
-    <h4>💱 Trade from ${from.name}</h4>
-    <p>${summary}</p>
-    <div class="trade-notif-btns">
-      <button class="btn-accept" onclick="openTradeReview('${tradeId}')">Review</button>
-      <button class="btn-decline" onclick="quickDeclineTrade('${tradeId}')">Decline</button>
-    </div>
-  `;
-  container.appendChild(notif);
-
-  // Auto-remove after 30s
-  setTimeout(() => notif.remove(), 30000);
-}
-
-function openTradeReview(tradeId) {
-  const trade = gameState?.pendingTrades?.[tradeId];
-  if (!trade) return;
-  tradeState.reviewTradeId = tradeId;
-
-  const from = gameState.players.find(p => p.id === trade.fromId);
-  const to = gameState.players.find(p => p.id === trade.toId);
-
-  const el = document.getElementById('trade-review-body');
-  let html = `<div class="trade-sides">`;
-
-  // FROM side
-  html += `<div class="trade-side">
-    <div class="trade-side-header">
-      <div class="trade-avatar" style="background:${from.color};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:white;border:2px solid rgba(255,255,255,0.25);">${from.name[0]}</div>
-      <span class="trade-side-name">${from.name} offers</span>
-    </div>`;
-  if (trade.fromCash > 0) html += `<div style="color:#f4c430;font-family:'Boogaloo',cursive;font-size:1.1rem;margin-bottom:0.4rem;">💰 $${trade.fromCash}</div>`;
-  (trade.fromProps || []).forEach(sid => {
-    const space = gameState.board[sid];
-    if (!space) return;
-    const colorHex = COLOR_HEX[space.color] || '#888';
-    html += `<div class="trade-prop-item" style="cursor:default;">
-      <div class="trade-prop-dot" style="background:${colorHex};width:8px;height:8px;border-radius:2px;flex-shrink:0;"></div>
-      <span class="trade-prop-name">${space.flag || ''} ${space.name}</span>
-      <span class="trade-prop-val">$${space.price}</span>
-    </div>`;
-  });
-  if (trade.fromCash === 0 && (trade.fromProps || []).length === 0) html += `<div style="color:#8b85a8;font-size:0.82rem;">Nothing</div>`;
-  html += `</div>`;
-
-  // Divider
-  html += `<div class="trade-divider"><div class="trade-swap-icon">⇄</div></div>`;
-
-  // TO side
-  html += `<div class="trade-side">
-    <div class="trade-side-header">
-      <div class="trade-avatar" style="background:${to.color};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:white;border:2px solid rgba(255,255,255,0.25);">${to.name[0]}</div>
-      <span class="trade-side-name">${to.name} gives</span>
-    </div>`;
-  if (trade.toCash > 0) html += `<div style="color:#f4c430;font-family:'Boogaloo',cursive;font-size:1.1rem;margin-bottom:0.4rem;">💰 $${trade.toCash}</div>`;
-  (trade.toProps || []).forEach(sid => {
-    const space = gameState.board[sid];
-    if (!space) return;
-    const colorHex = COLOR_HEX[space.color] || '#888';
-    html += `<div class="trade-prop-item" style="cursor:default;">
-      <div class="trade-prop-dot" style="background:${colorHex};width:8px;height:8px;border-radius:2px;flex-shrink:0;"></div>
-      <span class="trade-prop-name">${space.flag || ''} ${space.name}</span>
-      <span class="trade-prop-val">$${space.price}</span>
-    </div>`;
-  });
-  if (trade.toCash === 0 && (trade.toProps || []).length === 0) html += `<div style="color:#8b85a8;font-size:0.82rem;">Nothing</div>`;
-  html += `</div></div>`;
-
-  el.innerHTML = html;
-  document.getElementById(`trade-notif-${tradeId}`)?.remove();
-  showTradeStep('review');
-  document.getElementById('trade-modal-overlay').classList.add('open');
-}
-
-function respondToTrade(accept) {
-  if (!tradeState.reviewTradeId) return;
-  send('respond_trade', { tradeId: tradeState.reviewTradeId, accept });
-  closeTrade();
-}
-
-function quickDeclineTrade(tradeId) {
-  send('respond_trade', { tradeId, accept: false });
-  document.getElementById(`trade-notif-${tradeId}`)?.remove();
-}
-
-// Called from renderActions to check for incoming trades on state update
-function checkIncomingTrades() {
-  if (!gameState?.pendingTrades) return;
-  Object.entries(gameState.pendingTrades).forEach(([tradeId, trade]) => {
-    if (trade.toId === myPlayerId) {
-      const existing = document.getElementById(`trade-notif-${tradeId}`);
-      if (!existing) showTradeNotification(tradeId);
-    }
-  });
-}
-
-// ─── ACTIONS ──────────────────────────────────────────────────────────────────
-function rollDice() {
-  const d1 = document.getElementById('die1');
-  const d2 = document.getElementById('die2');
-  d1.classList.add('rolling'); d2.classList.add('rolling');
-  setTimeout(() => { d1.classList.remove('rolling'); d2.classList.remove('rolling'); }, 400);
-  send('roll_dice');
-}
-function buyProperty() { send('buy_property'); }
-function declineProperty() { send('decline_property'); }
-function payJail() { send('pay_jail'); }
-function useJailCard() { send('use_jail_card'); }
-function buildHouse(spaceId) { send('build_house', { spaceId }); }
-function sellHouse(spaceId) { send('sell_house', { spaceId }); }
-function placeBid() {
-  const amount = parseInt(document.getElementById('bid-amount')?.value);
-  if (amount) send('bid_auction', { amount });
-}
-function endAuction() { send('end_auction'); }
-
-// ─── SPACE DETAIL POPUP ───────────────────────────────────────────────────────
-function showSpaceDetail(spaceId, el) {
-  const space = gameState?.board[spaceId];
-  if (!space) return;
-  const prop = gameState?.properties[spaceId];
-  const owner = prop?.ownerId ? gameState.players.find(p => p.id === prop.ownerId) : null;
-  const detail = document.getElementById('space-detail');
-  document.getElementById('sd-name').textContent = `${space.flag||''} ${space.name}`;
-  let body = '';
-  if (space.price) body += `<div class="space-detail-row"><span>Price</span><span style="color:var(--gold)">$${space.price}</span></div>`;
-  if (owner) body += `<div class="space-detail-row"><span>Owner</span><span style="color:${owner.color}">${owner.name}</span></div>`;
-  if (space.rent) {
-    const labels = ['Rent','1 House','2 Houses','3 Houses','4 Houses','Hotel'];
-    space.rent.forEach((r, i) => {
-      const isActive = prop?.houses === i;
-      body += `<div class="space-detail-row" style="${isActive?'color:var(--gold)':''}"><span>${labels[i]}</span><span>$${r}</span></div>`;
+    
+    // 3. Crear Tokens de Jugadores
+    gameState.players.forEach(p => {
+      const token = document.createElement('div');
+      token.className = 'player-token';
+      token.id = `token-${p.id}`;
+      token.style.backgroundColor = p.color || '#000';
+      boardEl.appendChild(token);
     });
   }
-  if (prop?.mortgaged) body += `<div style="color:var(--danger);font-size:0.8rem;margin-top:4px;">Mortgaged</div>`;
-  document.getElementById('sd-body').innerHTML = body;
 
-  const rect = el.getBoundingClientRect();
-  detail.style.top = Math.min(rect.bottom + 4, window.innerHeight - 300) + 'px';
-  detail.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
-  detail.classList.add('open');
-  event.stopPropagation();
-}
-function closeSpaceDetail() { document.getElementById('space-detail').classList.remove('open'); }
-document.addEventListener('click', closeSpaceDetail);
+  // --- ANIMACIONES Y ACTUALIZACIÓN ---
+  function updateUI() {
+    if(!gameState) return;
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-initColorPickers();
-connect();
+    // Actualizar Turno y Botón
+    const isMyTurn = gameState.players[gameState.currentPlayerIndex].id === myPlayerId;
+    const btn = document.getElementById('roll-dice-btn');
+    const turnMsg = document.getElementById('turn-msg');
+    
+    if (isMyTurn && gameState.phase === 'playing' && !gameState.pendingAction) {
+      btn.disabled = false;
+      turnMsg.innerText = "¡ES TU TURNO!";
+      turnMsg.style.color = "var(--accent)";
+    } else {
+      btn.disabled = true;
+      const currentP = gameState.players[gameState.currentPlayerIndex];
+      turnMsg.innerText = `Turno de ${currentP.name}`;
+      turnMsg.style.color = "var(--muted)";
+    }
 
-// Close trade modal on overlay click
-document.getElementById('trade-modal-overlay').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('trade-modal-overlay')) closeTrade();
-});
+    // Actualizar Dados
+    if(gameState.dice) {
+      document.getElementById('dice-visual').innerText = getDiceEmoji(gameState.dice[0]) + getDiceEmoji(gameState.dice[1]);
+    }
+
+    // Mover Jugadores con Animación
+    gameState.players.forEach(p => {
+      movePlayerToken(p.id, p.position);
+    });
+
+    // Lista de Jugadores
+    const list = document.getElementById('players-list');
+    list.innerHTML = gameState.players.map((p, i) => `
+      <div class="player-card ${i === gameState.currentPlayerIndex ? 'active' : ''}">
+        <div style="width:15px; height:15px; border-radius:50%; background:${p.color}"></div>
+        <div style="flex:1"><b>${p.name}</b></div>
+        <div class="cash">$${p.cash}</div>
+      </div>
+    `).join('');
+
+    // Log de actividad
+    const logCont = document.getElementById('log-container');
+    logCont.innerHTML = gameState.log.slice(-20).map(l => `
+      <div class="log-entry">${l.msg}</div>
+    `).join('');
+  }
+
+  function movePlayerToken(playerId, position) {
+    const token = document.getElementById(`token-${playerId}`);
+    const space = document.getElementById(`space-${position}`);
+    if(!token || !space) return;
+
+    const rect = space.getBoundingClientRect();
+    const boardRect = document.getElementById('board').getBoundingClientRect();
+
+    // Calculamos posición relativa al tablero
+    // Añadimos un pequeño offset aleatorio para que los tokens no se tapen totalmente
+    const offset = (parseInt(playerId) % 4) * 5; 
+    const top = (rect.top - boardRect.top) + 15 + offset;
+    const left = (rect.left - boardRect.left) + 15 + offset;
+
+    token.style.top = `${top}px`;
+    token.style.left = `${left}px`;
+  }
+
+  // Función para mostrar mensajes "Haz recibido $50", etc.
+  function showToast(playerId, message) {
+    const token = document.getElementById(`token-${playerId}`);
+    if(!token) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = message;
+    token.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 2000);
+  }
+
+  function getDiceEmoji(num) {
+    return ['','⚀','⚁','⚂','⚃','⚄','⚅'][num] || '🎲';
+  }
+
+  // --- EVENTOS DEL SOCKET ---
+  socket.on('init', (data) => {
+    myPlayerId = data.playerId;
+  });
+
+  socket.on('state_update', (newState) => {
+    // Detectar cambios para mostrar Toasts
+    if(gameState) {
+      newState.players.forEach((p, i) => {
+        const oldP = gameState.players.find(x => x.id === p.id);
+        if(oldP && p.cash > oldP.cash) showToast(p.id, `+$${p.cash - oldP.cash} 💰`);
+        if(oldP && p.cash < oldP.cash) showToast(p.id, `-$${oldP.cash - p.cash} 💸`);
+      });
+    }
+
+    gameState = newState;
+    if(!document.getElementById('space-0')) renderBoard(); // Render inicial
+    updateUI();
+  });
+
+  function sendAction(type, payload = {}) {
+    socket.emit('game_action', { type, ...payload });
+  }
+
+  // Tooltip simple
+  function showSpaceDetail(e, i) {
+    const space = gameState.board[i];
+    const detail = document.getElementById('space-detail');
+    const header = document.getElementById('sd-header');
+    const body = document.getElementById('sd-body');
+
+    header.style.backgroundColor = space.color ? `var(--${space.color})` : '#334155';
+    header.innerText = space.name;
+    body.innerHTML = `
+      <p>Tipo: ${space.type}</p>
+      ${space.price ? `<p>Precio: <b>$${space.price}</b></p>` : ''}
+      ${space.rent ? `<p>Alquiler base: $${space.rent[0]}</p>` : ''}
+    `;
+
+    detail.style.left = `${e.pageX + 10}px`;
+    detail.style.top = `${e.pageY + 10}px`;
+    detail.classList.add('open');
+    e.stopPropagation();
+  }
+
+  document.onclick = () => document.getElementById('space-detail').classList.remove('open');
+
 </script>
 </body>
 </html>
