@@ -543,10 +543,14 @@ const COLOR_HEX={brown:'#8B4513',teal:'#008B8B',yellow:'#DAA520',purple:'#7B2D8B
 
 const BOARD_LAYOUT=(()=>{
   const l=[];
-  for(let i=0;i<=10;i++) l[i]={row:11,col:i,side:'bottom'};
-  for(let i=0;i<=8;i++)  l[11+i]={row:10-i,col:10,side:'right'};
-  for(let i=0;i<=10;i++) l[20+i]={row:0,col:10-i,side:'top'};
-  for(let i=0;i<=8;i++)  l[31+i]={row:1+i,col:0,side:'left'};
+  // Top row (left→right): GO at (0,0), Prison at (0,10)
+  for(let i=0;i<=10;i++) l[i]={row:0,col:i,side:'top'};
+  // Right column (top→bottom): Prison at (0,10), Vacation at (11,10)
+  for(let i=1;i<=11;i++) l[10+i]={row:i,col:10,side:'right'};
+  // Bottom row (right→left): Vacation at (11,10), Go to Prison at (11,0)
+  for(let i=0;i<=10;i++) l[22+i]={row:11,col:10-i,side:'bottom'};
+  // Left column (bottom→top): Go to Prison at (11,0), back toward GO
+  for(let i=0;i<=6;i++)  l[33+i]={row:10-i,col:0,side:'left'};
   return l;
 })();
 
