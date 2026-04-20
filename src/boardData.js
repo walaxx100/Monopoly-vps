@@ -142,7 +142,7 @@ const BOARD = [
   { id: 17, name: "Bologna", type: "property", price: 150, rent: [12,60,120,340,490,600], color: "purple", flag: "🇮🇹" },
   { id: 18, name: "Surprise", type: "surprise" },
   { id: 19, name: "Milan", type: "property", price: 160, rent: [12,60,120,340,490,600], color: "purple", flag: "🇮🇹" },
-  { id: 20, name: "Free Parking", type: "free_parking" },
+  { id: 20, name: "Vacation", type: "vacation" },
   { id: 21, name: "Rome", type: "property", price: 180, rent: [14,70,130,380,550,650], color: "orange", flag: "🇮🇹" },
   { id: 22, name: "Treasure", type: "treasure" },
   { id: 23, name: "Frankfurt", type: "property", price: 180, rent: [14,70,130,380,550,650], color: "orange", flag: "🇩🇪" },
