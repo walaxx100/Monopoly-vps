@@ -543,27 +543,23 @@ const COLOR_HEX={brown:'#8B4513',teal:'#008B8B',yellow:'#DAA520',purple:'#7B2D8B
 
 const BOARD_LAYOUT=(()=>{
   const l=[];
-  BOARD.forEach((space, index) => {
-    let row, col, side;
-    if (index < 13) {
-      row = 0;
-      col = index;
-      side = 'bottom';
-    } else if (index < 24) {
-      row = index - 13 + 1;
-      col = 12;
-      side = 'right';
-    } else if (index < 37) {
-      row = 12;
-      col = 12 - (index - 24);
-      side = 'top';
-    } else if (index < 48) {
-      row = 11 - (index - 37);
-      col = 0;
-      side = 'left';
-    }
-    if (row !== undefined) l[space.id] = {row, col, side};
-  });
+  let idx = 0;
+  // Bottom row: 13 spaces
+  for(let col = 0; col < 13; col++) {
+    l[idx++] = {row: 0, col, side: 'bottom'};
+  }
+  // Right column: 11 spaces
+  for(let row = 1; row <= 11; row++) {
+    l[idx++] = {row, col: 12, side: 'right'};
+  }
+  // Top row: 13 spaces
+  for(let col = 12; col >= 0; col--) {
+    l[idx++] = {row: 12, col, side: 'top'};
+  }
+  // Left column: 11 spaces
+  for(let row = 11; row >= 1; row--) {
+    l[idx++] = {row, col: 0, side: 'left'};
+  }
   return l;
 })();
 
