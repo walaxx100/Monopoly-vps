@@ -543,14 +543,27 @@ const COLOR_HEX={brown:'#8B4513',teal:'#008B8B',yellow:'#DAA520',purple:'#7B2D8B
 
 const BOARD_LAYOUT=(()=>{
   const l=[];
-  // Bottom row (left→right, row 0): ids 0-12 (13 casillas: GO + 11 + Prison)
-  for(let i=0;i<=12;i++) l[i]={row:0,col:i,side:'bottom'};
-  // Right column (top→bottom, col 12): ids 13-23 (11 casillas)
-  for(let i=1;i<=11;i++) l[12+i]={row:i,col:12,side:'right'};
-  // Top row (right→left, row 12): ids 24-36 (13 casillas)
-  for(let i=0;i<=12;i++) l[24+i]={row:12,col:12-i,side:'top'};
-  // Left column (bottom→top, col 0): ids 37-47 (11 casillas)
-  for(let i=0;i<=10;i++)  l[37+i]={row:11-i,col:0,side:'left'};
+  BOARD.forEach((space, index) => {
+    let row, col, side;
+    if (index < 13) {
+      row = 0;
+      col = index;
+      side = 'bottom';
+    } else if (index < 24) {
+      row = index - 13 + 1;
+      col = 12;
+      side = 'right';
+    } else if (index < 37) {
+      row = 12;
+      col = 12 - (index - 24);
+      side = 'top';
+    } else if (index < 48) {
+      row = 11 - (index - 37);
+      col = 0;
+      side = 'left';
+    }
+    if (row !== undefined) l[space.id] = {row, col, side};
+  });
   return l;
 })();
 
