@@ -646,7 +646,7 @@ class GameEngine {
   }
 
   _sendToJail(player) {
-    player.position = 10; // Jail space
+    player.position = 13; // Jail space
     player.inJail = true;
     player.jailTurns = 0;
     this.doublesCount = 0;
