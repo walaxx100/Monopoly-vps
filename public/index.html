@@ -105,9 +105,9 @@ input:focus,select:focus{border-color:var(--accent);}
 /* Left/right cells: rotate text so it reads correctly */
 .side-left  .space-inner{transform:rotate(180deg);}
 
-.space-flag{font-size:0.95rem;line-height:1;}
-.space-name{font-size:0.42rem;font-weight:700;line-height:1.15;text-align:center;color:#d8d4f0;word-break:break-word;max-width:58px;}
-.space-price{font-size:0.4rem;color:var(--gold);font-weight:700;}
+.space-flag{font-size:1.1rem;line-height:1;}
+.space-name{font-size:0.48rem;font-weight:700;line-height:1.15;text-align:center;color:#e8e4f8;word-break:break-word;max-width:58px;}
+.space-price{font-size:0.44rem;color:var(--gold);font-weight:700;}
 
 /* Owner dot */
 .owner-dot{position:absolute;width:7px;height:7px;border-radius:50%;border:1px solid rgba(0,0,0,0.5);z-index:3;}
@@ -269,10 +269,25 @@ input:focus,select:focus{border-color:var(--accent);}
 .modal h2{font-family:'Boogaloo',cursive;font-size:2rem;color:var(--gold);margin-bottom:1rem;}
 
 /* SPACE DETAIL */
-.space-detail{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0.9rem 1rem;min-width:190px;z-index:500;display:none;box-shadow:0 8px 32px rgba(0,0,0,0.6);}
+.space-detail{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0.9rem 1rem;min-width:210px;max-width:240px;z-index:500;display:none;box-shadow:0 8px 32px rgba(0,0,0,0.6);}
 .space-detail.open{display:block;}
 .space-detail h3{font-family:'Boogaloo',cursive;font-size:1.2rem;color:var(--gold);margin-bottom:0.35rem;}
 .space-detail-row{display:flex;justify-content:space-between;font-size:0.82rem;padding:0.2rem 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.sd-build-row{display:flex;align-items:center;justify-content:space-between;margin-top:0.6rem;padding-top:0.5rem;border-top:1px solid rgba(255,255,255,0.08);}
+.sd-build-info{font-size:0.78rem;color:var(--muted);}
+.sd-build-info strong{color:var(--text);}
+.sd-build-btns{display:flex;gap:0.35rem;}
+.sd-build-btn{
+  width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;
+  font-size:1.1rem;display:flex;align-items:center;justify-content:center;
+  transition:filter 0.15s,transform 0.1s;font-weight:900;
+}
+.sd-build-btn:active{transform:scale(0.93);}
+.sd-build-btn:disabled{opacity:0.3;cursor:not-allowed;}
+.sd-build-btn.up{background:#22cc55;color:white;}
+.sd-build-btn.up:hover:not(:disabled){filter:brightness(1.15);}
+.sd-build-btn.down{background:#cc3322;color:white;}
+.sd-build-btn.down:hover:not(:disabled){filter:brightness(1.15);}
 
 /* TRADE BAR */
 .trade-bar{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:0.4rem 0.65rem;margin-bottom:0.5rem;font-size:0.82rem;color:var(--muted);}
@@ -325,6 +340,22 @@ input:focus,select:focus{border-color:var(--accent);}
 .trade-notif-btns button{flex:1;padding:0.4rem;border:none;border-radius:7px;font-family:'Boogaloo',cursive;font-size:0.95rem;cursor:pointer;}
 .btn-accept{background:var(--success);color:white;}
 .btn-decline{background:var(--danger);color:white;}
+
+/* WAITING OVERLAY — shown on top of the board while in lobby */
+.waiting-overlay{
+  position:fixed;inset:0;background:rgba(13,12,24,0.82);
+  display:none;align-items:center;justify-content:center;z-index:800;
+  backdrop-filter:blur(4px);
+}
+.waiting-overlay.open{display:flex;}
+.waiting-overlay-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:18px;
+  padding:2rem;width:100%;max-width:420px;text-align:center;
+  animation:tradeIn 0.25s ease;
+}
+.waiting-overlay-card h2{font-family:'Boogaloo',cursive;color:var(--gold);font-size:1.8rem;margin-bottom:0.5rem;}
+.waiting-room-id{font-family:'Boogaloo',cursive;font-size:2.4rem;color:var(--gold);letter-spacing:10px;margin:0.75rem 0;word-break:break-all;}
+.waiting-players-row{display:flex;flex-wrap:wrap;gap:0.6rem;justify-content:center;margin:1rem 0;}
 
 @media(max-width:960px){
   #game-screen{flex-direction:column;}
@@ -490,6 +521,21 @@ input:focus,select:focus{border-color:var(--accent);}
   </div>
 </div>
 
+<!-- WAITING OVERLAY (shown on map while waiting) -->
+<div class="waiting-overlay" id="waiting-overlay">
+  <div class="waiting-overlay-card">
+    <h2>🌐 Waiting for players...</h2>
+    <div style="color:var(--muted);font-size:0.88rem;">Share this code with friends:</div>
+    <div class="waiting-room-id" id="waiting-room-id">------</div>
+    <div id="waiting-players-row" class="waiting-players-row"></div>
+    <div style="color:var(--muted);font-size:0.8rem;margin-bottom:1rem;">2–6 players · Host starts the game</div>
+    <button class="btn btn-gold" id="overlay-start-btn" onclick="startGame()" disabled style="width:100%;">▶ Start Game</button>
+    <div style="margin-top:0.75rem;">
+      <button class="btn btn-secondary" style="font-size:0.85rem;padding:0.4rem 1rem;" onclick="copyRoomCode()">📋 Copy code</button>
+    </div>
+  </div>
+</div>
+
 <!-- WINNER -->
 <div class="modal-overlay" id="winner-modal">
   <div class="modal">
@@ -504,6 +550,7 @@ input:focus,select:focus{border-color:var(--accent);}
 <div class="space-detail" id="space-detail">
   <h3 id="sd-name"></h3>
   <div id="sd-body"></div>
+  <div id="sd-build-section"></div>
 </div>
 
 <!-- TRADE MODAL -->
@@ -604,8 +651,8 @@ function handleMessage(msg){
   switch(msg.type){
     case 'connected': myId=msg.clientId; renderRoomList(msg.rooms||[]); break;
     case 'room_list': renderRoomList(msg.rooms||[]); break;
-    case 'joined_room': myPlayerId=msg.playerId; roomId=msg.roomId; gameState=msg.state; document.getElementById('room-code-display').textContent=roomId; showScreen('waiting-screen'); renderWaiting(); break;
-    case 'state_update': { const old=gameState; gameState=msg.state; if(gameState.phase==='playing'||gameState.phase==='ended'){ showScreen('game-screen'); renderGame(old); } else { renderWaiting(); } if(gameState.winner){ document.getElementById('winner-name').textContent=gameState.winner.name; document.getElementById('winner-modal').classList.add('open'); } break; }
+    case 'joined_room': myPlayerId=msg.playerId; roomId=msg.roomId; gameState=msg.state; showScreen('game-screen'); renderBoardOnly(); showWaitingOverlay(); break;
+    case 'state_update': { const old=gameState; gameState=msg.state; if(gameState.phase==='playing'||gameState.phase==='ended'){ hideWaitingOverlay(); renderGame(old); } else { renderBoardOnly(); showWaitingOverlay(); } if(gameState.winner){ document.getElementById('winner-name').textContent=gameState.winner.name; document.getElementById('winner-modal').classList.add('open'); } break; }
     case 'error': alert(msg.msg); break;
     case 'trade_incoming': setTimeout(()=>showTradeNotification(msg.tradeId),150); break;
   }
@@ -621,11 +668,40 @@ function createRoom(){ const name=document.getElementById('create-name').value.t
 function joinByCode(){ const name=document.getElementById('join-name').value.trim(); const code=document.getElementById('join-code').value.trim().toUpperCase(); if(!name){alert('Enter your name');return;} if(!code){alert('Enter a room code');return;} send('join_room',{name,color:selectedJoin,roomId:code}); }
 function startGame(){ send('start_game'); }
 
+function copyRoomCode(){ if(roomId) navigator.clipboard?.writeText(roomId).then(()=>alert('Code copied: '+roomId)).catch(()=>alert('Code: '+roomId)); }
+
+function showWaitingOverlay(){
+  const ov=document.getElementById('waiting-overlay');
+  ov.classList.add('open');
+  document.getElementById('waiting-room-id').textContent=roomId||'------';
+  const ps=document.getElementById('waiting-players-row'); ps.innerHTML='';
+  (gameState?.players||[]).forEach(p=>{
+    const el=document.createElement('div');
+    el.className='player-slot';
+    el.style.cssText=`background:${p.color}22;border:2px solid ${p.color};color:${p.color};padding:0.35rem 0.85rem;border-radius:20px;font-weight:700;font-size:0.85rem;`;
+    el.textContent=p.name; ps.appendChild(el);
+  });
+  const isHost=gameState?.players[0]?.id===myPlayerId;
+  const btn=document.getElementById('overlay-start-btn');
+  btn.disabled=!isHost||(gameState?.players?.length||0)<2;
+  btn.textContent=isHost?'▶ Start Game':'Waiting for host...';
+}
+
+function hideWaitingOverlay(){
+  document.getElementById('waiting-overlay').classList.remove('open');
+}
+
+// Render the board WITHOUT game actions — for preview while waiting
+function renderBoardOnly(){
+  showScreen('game-screen');
+  document.getElementById('center-title-area').style.display='';
+  document.getElementById('center-dice-area').style.display='none';
+  if(gameState) renderBoard();
+}
+
 function renderWaiting(){
-  if(!gameState)return;
-  const ps=document.getElementById('waiting-players'); ps.innerHTML='';
-  gameState.players.forEach(p=>{ const el=document.createElement('div'); el.className='player-slot'; el.style.cssText=`background:${p.color}22;border:2px solid ${p.color};color:${p.color};`; el.textContent=p.name; ps.appendChild(el); });
-  const btn=document.getElementById('start-btn'); const isHost=gameState.players[0]?.id===myPlayerId; btn.disabled=!isHost||gameState.players.length<2; btn.textContent=isHost?'▶ Start Game':'Waiting for host...';
+  // kept for compatibility — now handled by overlay
+  showWaitingOverlay();
 }
 
 // ── BOARD ──
@@ -677,23 +753,30 @@ function renderEdge(el,space,pos,prop,owner){
     if(owner) strip.style.boxShadow=`inset 0 0 0 2px ${owner.color}`;
     el.appendChild(strip);
   }
+
+  // Clean display name: strip trailing flag emoji from name string
+  const cleanName = (space.name||'').replace(/\s[\u{1F1E0}-\u{1F1FF}]{2}$/u,'').replace(/\s[\u{1F300}-\u{1FAFF}]$/u,'').trim();
+  // Flag: use space.flag if provided, else extract from name
+  const flagMatch = (space.name||'').match(/([\u{1F1E0}-\u{1F1FF}]{2}|[\u{1F300}-\u{1FAFF}])/u);
+  const flagEmoji = space.flag || (flagMatch ? flagMatch[0] : '');
+
   const inner=document.createElement('div'); inner.className='space-inner';
   if(space.type==='property'){
-    inner.innerHTML=`${space.flag?`<span class="space-flag">${space.flag}</span>`:''}<span class="space-name">${space.name}</span><span class="space-price">$${space.price}</span>${prop?.mortgaged?'<span style="font-size:0.38rem;color:#f39c12;">MORT</span>':''}`;
+    inner.innerHTML=`${flagEmoji?`<span class="space-flag">${flagEmoji}</span>`:''}<span class="space-name">${cleanName}</span><span class="space-price">$${space.price}</span>${prop?.mortgaged?'<span style="font-size:0.38rem;color:#f39c12;">MORT</span>':''}`;
   } else if(space.type==='railroad'){
-    inner.innerHTML=`<span class="space-flag">✈️</span><span class="space-name">${space.name}</span><span class="space-price">$${space.price}</span>`;
+    inner.innerHTML=`<span class="space-flag">✈️</span><span class="space-name">${cleanName}</span><span class="space-price">$${space.price}</span>`;
   } else if(space.type==='utility'){
-    inner.innerHTML=`<span class="space-flag">${space.flag||'⚡'}</span><span class="space-name">${space.name}</span><span class="space-price">$${space.price}</span>`;
+    inner.innerHTML=`<span class="space-flag">${space.flag||'⚡'}</span><span class="space-name">${cleanName}</span><span class="space-price">$${space.price}</span>`;
   } else if(space.type==='treasure'){
     inner.innerHTML=`<span class="space-flag">📦</span><span class="space-name" style="color:#f4c430;">Treasure</span>`;
   } else if(space.type==='surprise'){
     inner.innerHTML=`<span class="space-flag">❓</span><span class="space-name" style="color:#c084fc;">Surprise</span>`;
   } else if(space.type==='tax'){
-    inner.innerHTML=`<span class="space-flag">💸</span><span class="space-name">${space.name}</span><span class="space-price">${space.label||''}</span>`;
+    inner.innerHTML=`<span class="space-flag">💸</span><span class="space-name">${cleanName}</span><span class="space-price">${space.label||''}</span>`;
   } else if(space.type==='passing'){
     inner.innerHTML=`<span class="space-flag">👋</span><span class="space-name">Passing by</span>`;
   } else {
-    inner.innerHTML=`<span class="space-name">${space.name}</span>`;
+    inner.innerHTML=`<span class="space-name">${cleanName}</span>`;
   }
   el.appendChild(inner);
 
@@ -907,20 +990,75 @@ function showSpaceDetail(spaceId,el){
   const space=gameState?.board[spaceId]; if(!space)return;
   const prop=gameState?.properties[spaceId];
   const owner=prop?.ownerId?gameState.players.find(p=>p.id===prop.ownerId):null;
-  document.getElementById('sd-name').textContent=`${space.flag||''} ${space.name}`;
-  let body='';
-  if(space.price) body+=`<div class="space-detail-row"><span>Price</span><span style="color:var(--gold)">$${space.price}</span></div>`;
-  if(owner) body+=`<div class="space-detail-row"><span>Owner</span><span style="color:${owner.color}">${owner.name}</span></div>`;
-  if(space.rent){const labels=['Base Rent','1 House','2 Houses','3 Houses','4 Houses','Hotel']; space.rent.forEach((r,i)=>{ body+=`<div class="space-detail-row" style="${prop?.houses===i?'color:var(--gold)':''}"><span>${labels[i]}</span><span>$${r}</span></div>`; });}
-  if(prop?.mortgaged) body+=`<div style="color:var(--danger);font-size:0.78rem;margin-top:4px;">Mortgaged</div>`;
-  document.getElementById('sd-body').innerHTML=body;
-  const rect=el.getBoundingClientRect();
+  const isMyProp=prop?.ownerId===myPlayerId;
   const detail=document.getElementById('space-detail');
-  detail.style.top=Math.min(rect.bottom+4,window.innerHeight-280)+'px';
-  detail.style.left=Math.min(Math.max(rect.left,4),window.innerWidth-210)+'px';
+
+  // Clean name for display (strip trailing flag from name string)
+  const cleanName=(space.name||'').replace(/\s[\u{1F1E0}-\u{1F1FF}]{2}$/u,'').replace(/\s[\u{1F300}-\u{1FAFF}]$/u,'').trim();
+  const flagMatch=(space.name||'').match(/([\u{1F1E0}-\u{1F1FF}]{2}|[\u{1F300}-\u{1FAFF}])/u);
+  const flag=space.flag||(flagMatch?flagMatch[0]:'');
+
+  document.getElementById('sd-name').textContent=`${flag} ${cleanName}`;
+  let body='';
+
+  if(space.type==='railroad'){
+    body+=`<div class="space-detail-row"><span>Price</span><span style="color:var(--gold)">$${space.price}</span></div>`;
+    if(owner) body+=`<div class="space-detail-row"><span>Owner</span><span style="color:${owner.color}">${owner.name}</span></div>`;
+    // Airport rent table — show how many airports owner has
+    const ownedCount=owner?gameState.board.filter(s=>s.type==='railroad'&&gameState.properties[s.id]?.ownerId===owner.id).length:0;
+    const rrRents=[25,50,100,200];
+    const labels=['1 Airport','2 Airports','3 Airports','4 Airports'];
+    labels.forEach((lbl,i)=>{
+      const isActive=ownedCount===i+1&&owner;
+      body+=`<div class="space-detail-row" style="${isActive?'color:var(--gold);font-weight:700;':''}"><span>${lbl}</span><span>$${rrRents[i]}</span></div>`;
+    });
+  } else {
+    if(space.price) body+=`<div class="space-detail-row"><span>Price</span><span style="color:var(--gold)">$${space.price}</span></div>`;
+    if(owner) body+=`<div class="space-detail-row"><span>Owner</span><span style="color:${owner.color}">${owner.name}</span></div>`;
+    if(space.rent){
+      const labels=['Base Rent','1 House','2 Houses','3 Houses','4 Houses','Hotel'];
+      space.rent.forEach((r,i)=>{
+        body+=`<div class="space-detail-row" style="${prop?.houses===i?'color:var(--gold);font-weight:700;':''}"><span>${labels[i]}</span><span>$${r}</span></div>`;
+      });
+    }
+    if(prop?.mortgaged) body+=`<div style="color:var(--danger);font-size:0.78rem;margin-top:4px;">Mortgaged</div>`;
+  }
+
+  document.getElementById('sd-body').innerHTML=body;
+
+  // Build/sell arrows for my owned properties
+  let buildSection='';
+  if(isMyProp && space.type==='property' && !prop.mortgaged && gameState.phase==='playing'){
+    const houses=prop.houses||0;
+    const houseCost=_getHouseCostClient(space.color);
+    const sellVal=Math.floor(houseCost/2);
+    const houseLabel=houses===0?'No houses':houses===5?'🏨 Hotel':`🏠×${houses}`;
+    const canBuild=houses<5;
+    const canSell=houses>0;
+    buildSection=`<div class="sd-build-row">
+      <div class="sd-build-info"><strong>${houseLabel}</strong><br>+$${houseCost} / -$${sellVal}</div>
+      <div class="sd-build-btns">
+        <button class="sd-build-btn up" ${canBuild?'':'disabled'} onclick="buildHouse(${space.id});closeSpaceDetail();" title="Build house ($${houseCost})">▲</button>
+        <button class="sd-build-btn down" ${canSell?'':'disabled'} onclick="sellHouse(${space.id});closeSpaceDetail();" title="Sell house (+$${sellVal})">▼</button>
+      </div>
+    </div>`;
+  }
+  document.getElementById('sd-build-section').innerHTML=buildSection;
+
+  const rect=el.getBoundingClientRect();
+  detail.style.top=Math.min(rect.bottom+4,window.innerHeight-320)+'px';
+  detail.style.left=Math.min(Math.max(rect.left,4),window.innerWidth-250)+'px';
   detail.classList.add('open');
 }
-document.addEventListener('click',()=>document.getElementById('space-detail').classList.remove('open'));
+
+function closeSpaceDetail(){ document.getElementById('space-detail').classList.remove('open'); }
+document.addEventListener('click',e=>{ if(!e.target.closest('.space-detail')) closeSpaceDetail(); });
+
+// Client-side house cost lookup (mirrors gameEngine)
+function _getHouseCostClient(color){
+  const costs={brown:50,teal:50,yellow:100,purple:100,orange:100,red:150,pink:150,blue:150,green:200,lightblue:200,darkgreen:200};
+  return costs[color]||100;
+}
 
 // ── TRADES ──
 function openTradeModal(){ if(!gameState||gameState.phase!=='playing')return; tradeState={step:'player',targetId:null,myProps:new Set(),theirProps:new Set(),reviewTradeId:null}; showTradeStep('player'); renderTradePlayerList(); document.getElementById('trade-modal-overlay').classList.add('open'); }
