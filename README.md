@@ -4,62 +4,15 @@ Juego de Monopoly multijugador en tiempo real con el mapa Mr. Worldwide.
 
 ## 🚀 Deploy en tu VPS (Oracle Cloud Free Tier)
 
-### 1. Copiar los archivos a tu VPS
+### 1. Copiar los archivos al VPS
 
-```bash
-# En tu máquina local, comprimir el proyecto
-zip -r monopoly-worldwide.zip monopoly-worldwide/
-
-# Copiar al VPS
-scp monopoly-worldwide.zip ubuntu@TU_IP_VPS:~/
-```
-
-### 2. En el VPS
-
-```bash
-# Descomprimir
-unzip monopoly-worldwide.zip
-cd monopoly-worldwide
-
-# Levantar con Docker (no afecta tus otros contenedores)
+cd /home/monopoly/
+git pull origin main
 docker compose up -d --build
 
-# Verificar que está corriendo
-docker ps | grep monopoly
-docker logs monopoly-worldwide
-```
+### 2. Acceder al juego
 
-### 3. Abrir el puerto en Oracle Cloud
-
-En Oracle Cloud Console → Networking → VCN → Security Lists:
-- Agregar **Ingress Rule**: TCP puerto **3456** (o el que prefieras)
-
-También en el VPS:
-```bash
-sudo iptables -I INPUT -p tcp --dport 3456 -j ACCEPT
-# Para que persista:
-sudo netfilter-persistent save
-```
-
-### 4. Acceder al juego
-
-- **Directo**: `http://TU_IP_VPS:3456`
-- **Con nginx** (si tienes dominio): agrega el snippet de `nginx-snippet.conf` a tu config
-
-### Usar con nginx existente (sin afectar WordPress)
-
-Edita tu nginx config y agrega el bloque de `nginx-snippet.conf`:
-
-```bash
-# Editar config existente
-sudo nano /etc/nginx/sites-available/default
-# Pegar el contenido de nginx-snippet.conf dentro del server block existente
-sudo nginx -t && sudo nginx -s reload
-```
-
-Luego accede en: `http://tudominio.com/monopoly/`
-
----
+http://132.226.102.215:3456/
 
 ## 🎮 Cómo jugar
 
@@ -81,7 +34,6 @@ Luego accede en: `http://tudominio.com/monopoly/`
 
 ## 🔧 Comandos útiles
 
-```bash
 # Ver logs
 docker logs -f monopoly-worldwide
 
@@ -91,6 +43,6 @@ docker compose restart
 # Detener
 docker compose down
 
-# Actualizar (si cambias archivos)
-docker compose up -d --build
-```
+
+
+
